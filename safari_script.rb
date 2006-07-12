@@ -8,4 +8,4 @@ safari.link(:url, "http://www.pragmaticprogrammer.com/titles/ruby/code/index.htm
 safari.link(:text, "Catalog").click
 safari.link(:text, "All Books").click
 safari.link(:text, /Agile Retrospectives/).click
-print "FAILURE" unless safari.contains_text("Dave Hoover")
+puts "FAILURE" unless safari.contains_text("Dave Hoover")
