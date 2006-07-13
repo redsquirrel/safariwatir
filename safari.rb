@@ -52,6 +52,16 @@ module Watir
         end
       end
     end
+    
+    class AlertWindow
+      def initialize(scripter)
+        @scripter = scripter
+      end
+      
+      def click
+        @scripter.click_alert_ok
+      end
+    end
   end
   
   class Safari
@@ -71,6 +81,14 @@ module Watir
       @scripter = AppleScripter.new
     end
     
+    def close
+      scripter.close
+    end
+    
+    def quit
+      scripter.quit
+    end
+    
     def goto(url)
       scripter.navigate_to(url)
     end
@@ -85,7 +103,11 @@ module Watir
 
     def link(how, what)
       Link.new(scripter, how, what)
-    end 
+    end
+    
+    def alert
+      AlertWindow.new(scripter)
+    end
     
     def contains_text(what)
       text = scripter.document_text

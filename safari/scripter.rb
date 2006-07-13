@@ -3,6 +3,22 @@ module Watir
 
     @@timeout = 10
     
+    def initialize
+      execute(%|
+set document_list to every document
+if length of document_list is 0 then
+	make new document
+end if|)
+    end
+    
+    def close
+      execute(%|close document 1|)
+    end
+
+    def quit
+      execute(%|quit|)
+    end
+    
     def navigate_to(url)
       execute_and_wait(%|set URL in document 1 to "#{url}"|)
     end
@@ -12,7 +28,11 @@ module Watir
     end
         
     def highlight(name)
-      execute(operate_on_form_element(name) { %|element.originalColor = element.style.backgroundColor;element.style.backgroundColor = 'yellow';| })      
+      execute(operate_on_form_element(name) { %|
+element.focus();        
+element.originalColor = element.style.backgroundColor;
+element.style.backgroundColor = 'yellow';
+| })      
       
       yield self
       
@@ -24,7 +44,9 @@ module Watir
     end
         
     def append_text_input(name, value)
-      execute(operate_on_form_element(name) { %|element.value += '#{value}';| })
+      execute(operate_on_form_element(name) { %|
+element.value += '#{value}';
+element.setSelectionRange(element.value.length, element.value.length);| })
     end
     
     def click_button(name)
@@ -47,13 +69,32 @@ set target to do JavaScript "
   #{find_link_by('href', what)}
   #{click_link}" in document 1
 set URL in document 1 to target|)
-    end    
+    end
+    
+    def click_alert_ok
+      execute_system_events(%|
+tell window 1
+	if button named "OK" exists then
+		click button named "OK"
+	end if
+end tell|)
+    end 
 
     private
 
     def execute(script)
 `osascript <<SCRIPT
 tell application "Safari"
+  activate
+	#{script}
+end tell
+SCRIPT`
+    end
+
+    def execute_system_events(script)      
+`osascript <<SCRIPT
+tell application "System Events" to tell process "Safari"
+  activate
 	#{script}
 end tell
 SCRIPT`
@@ -113,8 +154,7 @@ if (element.onclick) {
 	}
 } else {
 	element.href;
-}      
-|
+}|
     end
   end # class AppleScripter
 end
