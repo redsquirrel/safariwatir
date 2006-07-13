@@ -91,6 +91,7 @@ end tell
 SCRIPT`
     end
 
+    # Must have "Enable access for assistive devices" checked in System Preferences > Universal Access
     def execute_system_events(script)      
 `osascript <<SCRIPT
 tell application "System Events" to tell process "Safari"
