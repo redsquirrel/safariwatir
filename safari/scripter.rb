@@ -42,19 +42,19 @@ element.style.backgroundColor = 'yellow';|
       execute(operate_on_element(how, what) { %|element.style.backgroundColor = element.originalColor;| })
     end
 
-    def clear_text_input(what = @what)
-      execute(operate_on_form_element(what) { %|element.value = '';| })
+    def clear_text_input(how = @how, what = @what)
+      execute(operate_on_element(how, what) { %|element.value = '';| })
     end
         
     def append_text_input(value, how = @how, what = @what)
-      execute(operate_on_form_element(what) do 
+      execute(operate_on_element(how, what) do 
 %|element.value += '#{value}';
 element.setSelectionRange(element.value.length, element.value.length);| 
       end)
     end
     
-    def click_button(how = @how, what = @what)
-      execute_and_wait(operate_on_element(how, what) { %|element.click();| })
+    def click_element(how = @how, what = @what)
+      execute(operate_on_element(how, what) { %|element.click();| })
     end
     
     def click_link(how = @how, what = @what)      
@@ -120,6 +120,8 @@ end repeat|)
           operate_on_form_element(what, &block)
         when :text:
           operate_on_link(how, what, &block)
+        when :id:
+          operate_by_id(what, &block)
       end      
     end
 
@@ -133,6 +135,12 @@ end repeat|)
 		  }
 		}
 	}" in document 1|
+    end
+
+    def operate_by_id(what)
+%|do JavaScript "
+var element = document.getElementById('#{what}');
+#{yield}" in document 1|  
     end
 
     def operate_on_link(how, what, &block)

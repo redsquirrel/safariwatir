@@ -12,6 +12,16 @@ module Watir
         @what = what
       end
     end
+
+    class AlertWindow
+      def initialize(scripter)
+        @scripter = scripter
+      end
+      
+      def click
+        @scripter.click_alert_ok
+      end
+    end
     
     class Button < Element
       def initialize(scripter, how, what)
@@ -20,11 +30,23 @@ module Watir
 
       def click
         @scripter.highlight(@how, @what) do |scripter|
-          scripter.click_button
+          scripter.click_element
         end
       end
     end
     
+    class Checkbox < Element
+      def initialize(scripter, how, what)
+        super(scripter, how, what)
+      end      
+      
+      def set
+        @scripter.highlight(@how, @what) do |scripter|
+          scripter.click_element
+        end
+      end
+    end
+
     class Link < Element
       def initialize(scripter, how, what)
         super(scripter, how, what)
@@ -45,20 +67,10 @@ module Watir
       def set(value)
         @scripter.highlight(@how, @what) do |scripter|
           scripter.clear_text_input
-          for i in 0 .. value.length-1
+          value.length.times do |i|
             scripter.append_text_input(value[i, 1])
           end
         end
-      end
-    end
-    
-    class AlertWindow
-      def initialize(scripter)
-        @scripter = scripter
-      end
-      
-      def click
-        @scripter.click_alert_ok
       end
     end
   end
@@ -94,6 +106,10 @@ module Watir
 
     def text_field(how, what)
       TextField.new(scripter, how, what)
+    end
+
+    def checkbox(how, what)
+      Checkbox.new(scripter, how, what)
     end
     
     def button(how, what)
