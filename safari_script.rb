@@ -24,7 +24,7 @@ def safari.ala_path
   text_field(:id, "search").set("grail")
   checkbox(:id, "incdisc").set
   button(:id, "submit").click
-  puts "FAILURE" unless safari.contains_text('Search Results for “grail”')  
+  puts "FAILURE" unless contains_text('Search Results for “grail”')  
 end
 
 safari.prag_path

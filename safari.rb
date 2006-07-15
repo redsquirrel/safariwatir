@@ -1,18 +1,11 @@
-require 'safari/scripter.rb'
+require 'safari/scripter'
+require 'safari/core_ext'
 require 'watir/exceptions'
 
 module Watir
   include Watir::Exception
 
   module Elements
-    class Element
-      def initialize(scripter, how, what)
-        @scripter = scripter
-        @how = how
-        @what = what
-      end
-    end
-
     class AlertWindow
       def initialize(scripter)
         @scripter = scripter
@@ -23,11 +16,11 @@ module Watir
       end
     end
     
+    class Element
+      init :scripter, :how, :what
+    end
+    
     class Button < Element
-      def initialize(scripter, how, what)
-        super(scripter, how, what)
-      end      
-
       def click
         @scripter.highlight(@how, @what) do |scripter|
           scripter.click_element
@@ -36,10 +29,6 @@ module Watir
     end
     
     class Checkbox < Element
-      def initialize(scripter, how, what)
-        super(scripter, how, what)
-      end      
-      
       def set
         @scripter.highlight(@how, @what) do |scripter|
           scripter.click_element
@@ -48,10 +37,6 @@ module Watir
     end
 
     class Link < Element
-      def initialize(scripter, how, what)
-        super(scripter, how, what)
-      end
-      
       def click
         @scripter.highlight(@how, @what) do |scripter|
           scripter.click_link
@@ -60,10 +45,6 @@ module Watir
     end
     
     class TextField < Element
-      def initialize(scripter, how, what)
-        super(scripter, how, what)
-      end      
-      
       def set(value)
         @scripter.highlight(@how, @what) do |scripter|
           scripter.clear_text_input
@@ -80,9 +61,7 @@ module Watir
 
     attr_reader :scripter
 
-    # Create a new Safari Window, starting at the specified url.
-    # If no url is given, start empty.
-    def self.start(url=nil)
+    def self.start(url = nil)
       safari = new
       safari.goto(url) if url
       safari
