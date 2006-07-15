@@ -19,7 +19,9 @@ module Watir
       end      
 
       def click
-        @scripter.click_button(@what);
+        @scripter.highlight(@how, @what) do |scripter|
+          scripter.click_button
+        end
       end
     end
     
@@ -29,12 +31,9 @@ module Watir
       end
       
       def click
-        case @how
-          when :text:
-            @scripter.click_link_with_text(@what)
-          when :url:
-            @scripter.click_link_with_url(@what)
-          end
+        @scripter.highlight(@how, @what) do |scripter|
+          scripter.click_link
+        end
       end
     end
     
@@ -44,10 +43,10 @@ module Watir
       end      
       
       def set(value)
-        @scripter.highlight(@what) do |scripter|
-          scripter.clear_text_input(@what)
+        @scripter.highlight(@how, @what) do |scripter|
+          scripter.clear_text_input
           for i in 0 .. value.length-1
-            scripter.append_text_input(@what, value[i, 1]);
+            scripter.append_text_input(value[i, 1])
           end
         end
       end

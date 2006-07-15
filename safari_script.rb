@@ -3,7 +3,6 @@ require 'safari'
 # TODO 
 # Need to give feedback when browser dies or when elements are not found
 # Be more attached to the Safari window, if a different window is selected, the AppleScript executes against it
-# Highlight link and button clicks 
 
 safari = Watir::Safari.start("http://google.com")
 safari.text_field(:name, "q").set("pickaxe")
