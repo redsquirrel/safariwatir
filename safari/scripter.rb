@@ -42,6 +42,16 @@ element.style.backgroundColor = 'yellow';|
       execute(operate_on_element(how, what) { %|element.style.backgroundColor = element.originalColor;| })
     end
 
+    def select_option(option_how, option_what, how = @how, what = @what)
+      execute(operate_on_element(how, what) do
+%|for (var i = 0; i < element.options.length; i++) {
+  if (element.options[i].#{option_how} == '#{option_what}') {
+    element.options[i].selected = true;
+  }
+}|
+      end)
+    end
+    
     def clear_text_input(how = @how, what = @what)
       execute(operate_on_element(how, what) { %|element.value = '';| })
     end
@@ -132,6 +142,7 @@ end repeat|)
 			var element = document.forms[i].elements[j];
 			if (element.name == '#{name}') {            
 			  #{yield}
+			  return;
 		  }
 		}
 	}" in document 1|
@@ -152,6 +163,7 @@ var element = document.getElementById('#{what}');
   if (document.links[i].#{handle_link_match(how, what)}) {
     var element = document.links[i];
     #{yield}
+    return;
   }
 }|      
     end

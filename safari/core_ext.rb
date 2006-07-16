@@ -1,6 +1,6 @@
 # Why shouldn't this be in core Ruby?
-class Module
-  def init(*attrs)
+class Class
+  def def_init(*attrs)
     constructor = %|def initialize(|
     constructor << attrs.map{|a| a.to_s }.join(",")
     constructor << ")\n"

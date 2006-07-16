@@ -7,7 +7,7 @@ require 'safari'
 
 safari = Watir::Safari.new
 
-def safari.prag_path
+def safari.google_to_prag
   goto("http://google.com")
   text_field(:name, "q").set("pickaxe")
   button(:name, "btnG").click
@@ -19,7 +19,7 @@ def safari.prag_path
   puts "FAILURE" unless contains_text("Dave Hoover")  
 end
 
-def safari.ala_path
+def safari.ala
   goto("http://alistapart.com/")
   text_field(:id, "search").set("grail")
   checkbox(:id, "incdisc").set
@@ -27,6 +27,13 @@ def safari.ala_path
   puts "FAILURE" unless contains_text('Search Results for “grail”')  
 end
 
-safari.prag_path
-safari.ala_path
-safari.close
+#safari.google_to_prag
+#safari.ala
+
+safari.goto("http://amazon.com")
+safari.select_list(:name, "url").select("Toys")
+safari.select_list(:name, "url").select_value("index=software")
+safari.text_field(:name, "keywords").set("Orion")
+# safari.image(:name, "Go").click
+#puts "FAILURE" unless safari.contains_text("Master of Orion (Original Release) (PC)")
+#safari.close

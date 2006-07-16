@@ -17,7 +17,7 @@ module Watir
     end
     
     class Element
-      init :scripter, :how, :what
+      def_init :scripter, :how, :what
     end
     
     class Button < Element
@@ -44,6 +44,20 @@ module Watir
       end
     end
     
+    class SelectList < Element
+      def select(label)
+        @scripter.highlight(@how, @what) do |scripter|
+          scripter.select_option("text", label)
+        end
+      end
+
+      def select_value(value)
+        @scripter.highlight(@how, @what) do |scripter|
+          scripter.select_option("value", value)
+        end
+      end
+    end
+
     class TextField < Element
       def set(value)
         @scripter.highlight(@how, @what) do |scripter|
@@ -78,29 +92,33 @@ module Watir
     def quit
       scripter.quit
     end
+
+    def alert
+      AlertWindow.new(scripter)
+    end
     
     def goto(url)
       scripter.navigate_to(url)
     end
 
-    def text_field(how, what)
-      TextField.new(scripter, how, what)
+    def button(how, what)
+      Button.new(scripter, how, what)
     end
 
     def checkbox(how, what)
       Checkbox.new(scripter, how, what)
     end
     
-    def button(how, what)
-      Button.new(scripter, how, what)
-    end
-
     def link(how, what)
       Link.new(scripter, how, what)
     end
+
+    def select_list(how, what)
+      SelectList.new(scripter, how, what)
+    end
     
-    def alert
-      AlertWindow.new(scripter)
+    def text_field(how, what)
+      TextField.new(scripter, how, what)
     end
     
     def contains_text(what)
