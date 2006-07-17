@@ -62,9 +62,13 @@ element.style.backgroundColor = 'yellow';|
 element.setSelectionRange(element.value.length, element.value.length);| 
       end)
     end
-    
-    def click_element(how = @how, what = @what)
+
+    def click_checkbox(how = @how, what = @what)      
       execute(operate_on_element(how, what) { %|element.click();| })
+    end
+    
+    def click_button(how = @how, what = @what)      
+      execute_and_wait(operate_on_element(how, what) { %|element.click();| })
     end
     
     def click_link(how = @how, what = @what)      
@@ -76,7 +80,7 @@ if (element.onclick) {
 		return element.href;
 	}
 } else {
-	element.href;
+	return element.href;
 }|
       end
       execute_and_wait(%|set target to do JavaScript "#{click}" in document 1
@@ -137,15 +141,16 @@ end repeat|)
 
     def operate_on_form_element(name)
 %|do JavaScript "
-	for (var i = 0; i < document.forms.length; i++) {
-		for (var j = 0; j < document.forms[i].elements.length; j++) {
-			var element = document.forms[i].elements[j];
-			if (element.name == '#{name}') {            
-			  #{yield}
-			  return;
-		  }
-		}
-	}" in document 1|
+var elements = document.getElementsByName('#{name}');
+var element;
+for (var i = 0; i < elements.length; i++) {
+  if (elements[i].tagName != 'META') {
+    element = elements[i];
+    break;
+  }
+}
+#{yield}
+" in document 1|
     end
 
     def operate_by_id(what)

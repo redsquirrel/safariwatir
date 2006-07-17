@@ -23,7 +23,7 @@ module Watir
     class Button < Element
       def click
         @scripter.highlight(@how, @what) do |scripter|
-          scripter.click_element
+          scripter.click_button
         end
       end
     end
@@ -31,7 +31,7 @@ module Watir
     class Checkbox < Element
       def set
         @scripter.highlight(@how, @what) do |scripter|
-          scripter.click_element
+          scripter.click_checkbox
         end
       end
     end
@@ -107,6 +107,10 @@ module Watir
 
     def checkbox(how, what)
       Checkbox.new(scripter, how, what)
+    end
+
+    def image(how, what)
+      Button.new(scripter, how, what)
     end
     
     def link(how, what)

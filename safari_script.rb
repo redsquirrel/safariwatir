@@ -5,6 +5,10 @@ require 'safari'
 # Be more attached to the Safari window, if a different window is selected, the AppleScript executes against it
 # Verify onclick is working for buttons and links
 
+# Radio, Textarea, Div, UL/OL, Span, Password
+# Use dynamic properties for Javascript optimization
+# Would using popen or open3 reduce the number of sub-processes?
+
 safari = Watir::Safari.new
 
 def safari.google_to_prag
@@ -24,16 +28,20 @@ def safari.ala
   text_field(:id, "search").set("grail")
   checkbox(:id, "incdisc").set
   button(:id, "submit").click
-  puts "FAILURE" unless contains_text('Search Results for “grail”')  
+  puts "FAILURE" unless contains_text('Search Results for “grail”')
 end
 
-#safari.google_to_prag
-#safari.ala
+def safari.amazon
+  goto("http://amazon.com")
+  select_list(:name, "url").select("Toys")
+  select_list(:name, "url").select_value("index=software")
+  text_field(:name, "keywords").set("Orion")
+  image(:name, "Go").click
+  puts "FAILURE" unless contains_text("Master of Orion (Original Release) (PC)")
+end
 
-safari.goto("http://amazon.com")
-safari.select_list(:name, "url").select("Toys")
-safari.select_list(:name, "url").select_value("index=software")
-safari.text_field(:name, "keywords").set("Orion")
-# safari.image(:name, "Go").click
-#puts "FAILURE" unless safari.contains_text("Master of Orion (Original Release) (PC)")
-#safari.close
+safari.google_to_prag
+safari.ala
+safari.amazon
+
+safari.close
