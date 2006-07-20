@@ -18,52 +18,91 @@ module Watir
     
     class Element
       def_init :scripter, :how, :what
-    end
-    
-    class Button < Element
+      attr_reader :how, :what
+      
       def click
-        @scripter.highlight(@how, @what) do |scripter|
-          scripter.click_button
+        @scripter.highlight(self) do
+          click_element
         end
+      end
+      
+      # Hook for subclasses
+      def by_value; end
+
+      def operate(&block)
+        send("operate_by_" + how.to_s, &block)
+      end
+
+      protected
+      
+      def operate_by_name(&block)
+        @scripter.operate_on_form_element(self, &block)        
+      end
+
+      def operate_by_text(&block)
+        @scripter.operate_on_link(self, &block)        
+      end
+
+      def operate_by_id(&block)
+        @scripter.operate_by_id(self, &block)        
+      end
+
+      def operate_by_url(&block)
+        @scripter.operate_on_link(self, &block)        
       end
     end
     
+    class Button < Element
+    end
+    
     class Checkbox < Element
-      def set
-        @scripter.highlight(@how, @what) do |scripter|
-          scripter.click_checkbox
-        end
+      alias :set :click
+    end
+
+    class Label < Element
+      protected
+      
+      def operate_by_text(&block)
+        @scripter.operate_on_label(self, &block)
       end
     end
 
     class Link < Element
       def click
-        @scripter.highlight(@how, @what) do |scripter|
-          scripter.click_link
+        @scripter.highlight(self) do
+          click_link
         end
       end
     end
     
+    class Radio < Element
+      def_init :scripter, :how, :what, :value
+      def by_value
+        @value
+      end
+      alias :set :click
+    end
+
     class SelectList < Element
       def select(label)
-        @scripter.highlight(@how, @what) do |scripter|
-          scripter.select_option("text", label)
+        @scripter.highlight(self) do
+          select_option("text", label)
         end
       end
 
       def select_value(value)
-        @scripter.highlight(@how, @what) do |scripter|
-          scripter.select_option("value", value)
+        @scripter.highlight(self) do
+          select_option("value", value)
         end
       end
     end
 
     class TextField < Element
       def set(value)
-        @scripter.highlight(@how, @what) do |scripter|
-          scripter.clear_text_input
+        @scripter.highlight(self) do
+          clear_text_input
           value.length.times do |i|
-            scripter.append_text_input(value[i, 1])
+            append_text_input(value[i, 1])
           end
         end
       end
@@ -112,9 +151,17 @@ module Watir
     def image(how, what)
       Button.new(scripter, how, what)
     end
+
+    def label(how, what)
+      Label.new(scripter, how, what)
+    end
     
     def link(how, what)
       Link.new(scripter, how, what)
+    end
+
+    def radio(how, what, value = nil)
+      Radio.new(scripter, how, what, value)
     end
 
     def select_list(how, what)
