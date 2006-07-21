@@ -136,6 +136,13 @@ var element = document.getElementById('#{element.what}');
 #{yield}" in document 1|  
     end
 
+    def operate_by_index(element)
+%|do JavaScript "
+var elements = document.getElementsByTagName('#{element.tag}');
+var element = elements[#{element.what}];
+#{yield}" in document 1|  
+    end
+
     def operate_on_label(element)
 %|do JavaScript "
 var elements = document.getElementsByTagName('LABEL');
@@ -150,8 +157,11 @@ for (var i = 0; i < elements.length; i++) {
 " in document 1|      
     end
 
+    def submit_form(element)
+      execute_and_wait(element.operate { %|element.submit();| })
+    end
 
-    def click_alert_ok
+    def click_link_ok
       execute_system_events(%|
 tell window 1
 	if button named "OK" exists then

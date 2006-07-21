@@ -15,19 +15,13 @@ module Watir
         @scripter.click_alert_ok
       end
     end
-    
-    class Element
+
+    class HtmlElement
       def_init :scripter, :how, :what
       attr_reader :how, :what
-      
-      def click
-        @scripter.highlight(self) do
-          click_element
-        end
-      end
-      
-      # Hook for subclasses
-      def by_value; end
+
+      # Hooks for subclasses
+      def tag; end
 
       def operate(&block)
         send("operate_by_" + how.to_s, &block)
@@ -35,31 +29,52 @@ module Watir
 
       protected
       
-      def operate_by_name(&block)
-        @scripter.operate_on_form_element(self, &block)        
-      end
-
-      def operate_by_text(&block)
-        @scripter.operate_on_link(self, &block)        
-      end
-
       def operate_by_id(&block)
         @scripter.operate_by_id(self, &block)        
       end
-
+      def operate_by_index(&block)
+        @scripter.operate_by_index(self, &block)        
+      end
+      def operate_by_name(&block)
+        @scripter.operate_on_form_element(self, &block)        
+      end
+      def operate_by_text(&block)
+        @scripter.operate_on_link(self, &block)        
+      end
       def operate_by_url(&block)
         @scripter.operate_on_link(self, &block)        
       end
     end
-    
-    class Button < Element
+
+    class Form < HtmlElement
+      def_init :scripter, :how, :what
+
+      def submit
+        @scripter.submit_form(self)
+      end
+      
+      def tag; "FORM"; end
     end
     
-    class Checkbox < Element
+    class ClickableElement < HtmlElement      
+      def click
+        @scripter.highlight(self) do
+          click_element
+        end
+      end
+
+      # Hooks for subclasses
+      def by_value; end
+    end
+    
+    class Button < ClickableElement
+    end
+    
+    class Checkbox < ClickableElement
       alias :set :click
     end
 
-    class Label < Element
+    class Label < ClickableElement
       protected
       
       def operate_by_text(&block)
@@ -67,15 +82,15 @@ module Watir
       end
     end
 
-    class Link < Element
+    class Link < ClickableElement
       def click
         @scripter.highlight(self) do
           click_link
         end
       end
     end
-    
-    class Radio < Element
+
+    class Radio < ClickableElement
       def_init :scripter, :how, :what, :value
       def by_value
         @value
@@ -83,7 +98,7 @@ module Watir
       alias :set :click
     end
 
-    class SelectList < Element
+    class SelectList < ClickableElement
       def select(label)
         @scripter.highlight(self) do
           select_option("text", label)
@@ -97,7 +112,7 @@ module Watir
       end
     end
 
-    class TextField < Element
+    class TextField < ClickableElement
       def set(value)
         @scripter.highlight(self) do
           clear_text_input
@@ -106,6 +121,9 @@ module Watir
           end
         end
       end
+    end
+
+    class Password < TextField
     end
   end
   
@@ -148,6 +166,10 @@ module Watir
       Checkbox.new(scripter, how, what)
     end
 
+    def form(how, what)
+      Form.new(scripter, how, what)
+    end
+
     def image(how, what)
       Button.new(scripter, how, what)
     end
@@ -158,6 +180,10 @@ module Watir
     
     def link(how, what)
       Link.new(scripter, how, what)
+    end
+
+    def password(how, what)
+      Password.new(scripter, how, what)
     end
 
     def radio(how, what, value = nil)
