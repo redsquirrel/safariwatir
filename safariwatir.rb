@@ -1,5 +1,5 @@
-require 'safari/scripter'
-require 'safari/core_ext'
+require 'safariwatir/scripter'
+require 'safariwatir/core_ext'
 require 'watir/exceptions'
 
 module Watir

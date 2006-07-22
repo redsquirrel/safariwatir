@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
 	s.description = %q{WATIR stands for "Web Application Testing in Ruby".  See WATIR project for more information.  This is simply a Safari-version of the original IE-only WATIR.}
 	s.email = %q{dave.hoover@gmail.com}
 	s.homepage = %q{http://safariwatir.rubyforge.org/}
-	s.autorequire = %q{safari}
+	s.autorequire = %q{safariwatir}
 	s.authors = ["Dave Hoover"]
 	s.require_paths = ['.']
 	s.requirements = ["Mac OS X running Safari", %q{Some features require you to turn on "Enable access for assistive devices" in System Preferences > Universal Access}]
-	s.files = ["safari.rb","safari_script.rb","safari/core_ext.rb","safari/scripter.rb","watir/exceptions.rb"]
+	s.files = ["safariwatir.rb","safariwatir_script.rb","safariwatir/core_ext.rb","safariwatir/scripter.rb","watir/exceptions.rb"]
 end
