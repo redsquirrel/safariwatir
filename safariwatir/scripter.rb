@@ -1,7 +1,28 @@
 module Watir
-  class AppleScripter
+  NOT_FOUND = "__safari_watir_unfound__"
+  NO_RESPONSE = "__safari_watir_no_response__"
 
-    @@timeout = 10
+  module JavaScripter
+    def js_operation(locator, operation)
+      js_wrapper(%|
+#{locator}
+if (element) {
+  #{operation}
+} else {
+  return '#{NOT_FOUND}';
+}|)
+    end
+    
+    def js_wrapper(script)
+      %|set response to do JavaScript "#{script}" in document 1|
+    end
+  end
+  
+  class AppleScripter
+    include JavaScripter
+    include Watir::Exception
+    
+    TIMEOUT = 10
   
     def initialize
       ensure_window_ready
@@ -18,9 +39,25 @@ module Watir
     def navigate_to(url)
       execute_and_wait(%|set URL in document 1 to "#{url}"|)
     end
+
+    def speak_value_of(element = @element)
+      speak(get_value_for(element))
+    end
+
+    def get_text_for(element = @element)
+      execute(element.operate { %|return element.innerText| }, element)
+    end
+
+    def speak_text_of(element = @element)
+      speak(element.text)
+    end
+
+    def get_value_for(element = @element)
+      execute(element.operate { %|return element.value;| }, element)
+    end
       
     def document_text
-      execute(%|do Javascript "document.getElementsByTagName('BODY').item(0).innerText;" in document 1|)
+      execute(js_wrapper(%|document.getElementsByTagName('BODY').item(0).innerText;|))
     end
       
     def highlight(element, &block)
@@ -28,13 +65,26 @@ module Watir
 %|element.focus();        
 element.originalColor = element.style.backgroundColor;
 element.style.backgroundColor = 'yellow';|
-      end)      
+      end, element)      
 
       @element = element
       instance_eval(&block)
       @element = nil
 
-      execute(element.operate { %|element.style.backgroundColor = element.originalColor;| })
+      execute_and_ignore(element.operate { %|element.style.backgroundColor = element.originalColor;| })
+    end
+
+    def speak_options_for(element = @element)
+      values = execute(element.operate do
+%|var values = '';
+for (var i = 0; i < element.options.length; i++) {
+  if (element.options[i].selected == true) {
+    values += ' ' + element.options[i].text;
+  }
+}
+return values|
+      end, element)
+      speak(values)
     end
 
     def select_option(option_how, option_what, element = @element)
@@ -44,18 +94,18 @@ element.style.backgroundColor = 'yellow';|
     element.options[i].selected = true;
   }
 }|
-      end)
+      end, element)
     end
-  
+    
     def clear_text_input(element = @element)
-      execute(element.operate { %|element.value = '';| })
+      execute(element.operate { %|element.value = '';| }, element)
     end
       
     def append_text_input(value, element = @element)
       execute(element.operate do 
 %|element.value += '#{value}';
 element.setSelectionRange(element.value.length, element.value.length);| 
-      end)
+      end, element)
     end
 
     # TODO need a better approach for "waiting"
@@ -64,8 +114,8 @@ element.setSelectionRange(element.value.length, element.value.length);|
     end
   
     def click_link(element = @element)      
-      click = find_link(element) do
-%|var click = document.createEvent('HTMLEvents');
+      click = find_link(element) + %|
+var click = document.createEvent('HTMLEvents');
 click.initEvent('click', true, true);
 if (element.onclick) {
  	if (false != element.onclick(click)) {
@@ -74,23 +124,22 @@ if (element.onclick) {
 } else {
 	return element.href;
 }|
-      end
       execute_and_wait(%|set target to do JavaScript "#{click}" in document 1
 set URL in document 1 to target|)
     end
 
-    def operate_on_link(element, &block)
-      %|do JavaScript "#{find_link(element, &block)}" in document 1|  
+    def operate_on_link(element)
+      js_operation(find_link(element), yield)
     end
 
     def find_link(element)
-%|for (var i = 0; i < document.links.length; i++) {
+%|var element = undefined;
+for (var i = 0; i < document.links.length; i++) {
   if (document.links[i].#{handle_match(element)}) {
-    var element = document.links[i];
-    #{yield}
+    element = document.links[i];
     break;
   }
-}|      
+}|
     end
     private :find_link
 
@@ -105,17 +154,29 @@ set URL in document 1 to target|)
     end
     private :handle_match
   
-    def operate_on_form_element(element)
-%|do JavaScript "
+    def operate_by_input_value(element)
+      js_operation(%|
+var elements = document.getElementsByTagName('INPUT');
+var element = undefined;
+for (var i = 0; i < elements.length; i++) {
+  if (elements[i].tagName != 'META') {
+    if (elements[i].value == '#{element.what}') {
+      element = elements[i];
+      break;
+    }
+  }
+}|, yield)
+    end
+
+    def operate_by_name(element)
+      js_operation(%|
 var elements = document.getElementsByName('#{element.what}');
-var element;
+var element = undefined;
 for (var i = 0; i < elements.length; i++) {
   if (elements[i].tagName != 'META') {
     #{handle_form_element_name_match(element)}
   }
-}
-#{yield}
-" in document 1|
+}|, yield)
     end
     
     def handle_form_element_name_match(element)
@@ -131,37 +192,29 @@ for (var i = 0; i < elements.length; i++) {
     private :handle_form_element_name_match
 
     def operate_by_id(element)
-%|do JavaScript "
-var element = document.getElementById('#{element.what}');
-#{yield}" in document 1|  
+      js_operation("var element = document.getElementById('#{element.what}');", yield)
     end
 
     def operate_by_index(element)
-%|do JavaScript "
-var elements = document.getElementsByTagName('#{element.tag}');
-var element = elements[#{element.what}];
-#{yield}" in document 1|  
+      js_operation(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what}];|, yield)
     end
 
     def operate_on_label(element)
-%|do JavaScript "
-var elements = document.getElementsByTagName('LABEL');
-var element;
+      js_operation(%|var elements = document.getElementsByTagName('LABEL');
+var element = undefined;
 for (var i = 0; i < elements.length; i++) {
-  if (elements[i].textContent == '#{element.what}') {
+  if (elements[i].innerText == '#{element.what}') {
     element = elements[i];
-    #{yield}
     break;
   }
-}
-" in document 1|      
+}|, yield)
     end
 
     def submit_form(element)
       execute_and_wait(element.operate { %|element.submit();| })
     end
 
-    def click_link_ok
+    def click_alert_ok
       execute_system_events(%|
 tell window 1
 	if button named "OK" exists then
@@ -172,13 +225,32 @@ end tell|)
 
     private
 
-    def execute(script)      
-     # puts script
+    def execute!(script)
+# puts script
 `osascript <<SCRIPT
 tell application "Safari"
+  set response to "#{NO_RESPONSE}"
 	#{script}
+	response
 end tell
-SCRIPT`
+SCRIPT`.chomp
+    end    
+    
+    def execute(script, element = nil)
+      response = execute! script
+      case response
+        when NOT_FOUND:
+          raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}." 
+        when NO_RESPONSE:
+          nil
+        else
+          response
+      end
+    end
+    
+    def execute_and_ignore(script)
+      execute! script
+      nil
     end
 
     # Must have "Enable access for assistive devices" checked in System Preferences > Universal Access
@@ -188,19 +260,20 @@ tell application "System Events" to tell process "Safari"
 	#{script}
 end tell
 SCRIPT`
+      nil
     end
 
-    def execute_and_wait(script)
+    def execute_and_wait(script, element = nil)
       execute(%|
 #{script}
 delay 2
-repeat with i from 1 to #{@@timeout}
+repeat with i from 1 to #{TIMEOUT}
   if (do JavaScript "document.readyState" in document 1) is "complete" then
     exit repeat
   else
     delay 1
   end if
-end repeat|)
+end repeat|, element)
     end
   
     def ensure_window_ready
@@ -210,6 +283,13 @@ set document_list to every document
 if length of document_list is 0 then
 	make new document
 end if|)      
+    end
+    
+    def speak(string)
+`osascript <<SCRIPT
+say "#{string.quote_safe}"
+SCRIPT`
+      nil
     end
   end # class AppleScripter
 end

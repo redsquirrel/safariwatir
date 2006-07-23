@@ -1,15 +1,17 @@
-require 'safari'
+require 'rubygems'
+require 'safariwatir'
 
 # TODO 
-# Need to give feedback when browser dies or when elements are not found
+# Need to give feedback when browser dies
 # Be more attached to the Safari window, if a different window is selected, the AppleScript executes against it
 # Verify onclick is working for buttons and links
+# TextFields should not respond to button method, etc.
 
-# Unsupported Elements: Textarea, Div, UL/OL, Span
+# Unsupported Elements: UL/OL
 # Use dynamic properties for Javascript optimization?
 # Will I need to push more functionality into AppleScript to speed things up?
 # Angrez is looking into the Ruby/AppleScript binding
-# Watir Rails Plugin needed
+# Watir Rails Plugin needed -> Watir test generator, fixtures and AR in-test, Browser Factory
 
 # SAFARI ISSUES
 # Labels are not clickable
@@ -67,10 +69,35 @@ def safari.reddit
   puts "FAILURE reddit" unless contains_text("foo") and contains_text("logout")  
 end
 
+def safari.colbert
+  goto("http://www.colbertnation.com/cn/contact.php")
+  text_field(:name, "formmessage").set("Beware the Bear")
+  button(:value, "Send Email").click
+  puts "FAILURE colbert" unless text_field(:name, "formmessage").verify_contains("Enter message")  
+end
+
+def safari.redsquirrel
+  goto("http://redsquirrel.com/")
+  begin
+    text_field(:id, "not_there").set("imaginary")
+    puts "FAILURE squirrel text no e"
+  rescue Watir::UnknownObjectException => e
+    puts "FAILURE squirrel text bad e" unless e.message =~ /not_there/
+  end
+  begin
+    link(:text, "no_where").click
+    puts "FAILURE squirrel link no e"
+  rescue Watir::UnknownObjectException => e
+    puts "FAILURE squirrel link bad e" unless e.message =~ /no_where/
+  end
+end
+
 safari.google_to_prag
 safari.ala
 safari.amazon
 safari.google_advanced
 safari.reddit
+safari.colbert
+safari.redsquirrel
 
 safari.close

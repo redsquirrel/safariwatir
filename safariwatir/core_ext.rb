@@ -11,3 +11,9 @@ class Class
     class_eval(constructor)
   end
 end
+
+class String
+  def quote_safe
+    gsub(/"/, '\"')
+  end
+end

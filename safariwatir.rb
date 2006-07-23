@@ -1,9 +1,17 @@
+require 'watir/exceptions'
 require 'safariwatir/scripter'
 require 'safariwatir/core_ext'
-require 'watir/exceptions'
 
 module Watir
   include Watir::Exception
+
+  module Clickable
+    def click
+      @scripter.highlight(self) do
+        click_element
+      end
+    end    
+  end
 
   module Elements
     class AlertWindow
@@ -22,6 +30,11 @@ module Watir
 
       # Hooks for subclasses
       def tag; end
+      def speak; end
+
+      def name
+        self.class.name.split("::").last
+      end
 
       def operate(&block)
         send("operate_by_" + how.to_s, &block)
@@ -36,13 +49,16 @@ module Watir
         @scripter.operate_by_index(self, &block)        
       end
       def operate_by_name(&block)
-        @scripter.operate_on_form_element(self, &block)        
+        @scripter.operate_by_name(self, &block)        
       end
       def operate_by_text(&block)
         @scripter.operate_on_link(self, &block)        
       end
       def operate_by_url(&block)
         @scripter.operate_on_link(self, &block)        
+      end
+      def operate_by_value(&block)
+        @scripter.operate_by_input_value(self, &block)
       end
     end
 
@@ -56,41 +72,33 @@ module Watir
       def tag; "FORM"; end
     end
     
-    class ClickableElement < HtmlElement      
-      def click
-        @scripter.highlight(self) do
-          click_element
-        end
+    class InputElement < HtmlElement
+      include Clickable
+      
+      def speak
+        @scripter.speak_value_of(self)
       end
 
       # Hooks for subclasses
       def by_value; end
     end
     
-    class Button < ClickableElement
+    class ContentElement < HtmlElement
+      include Clickable
+
+      def text
+        @scripter.get_text_for(self)
+      end
+
+      def speak
+        @scripter.speak_text_of(self)
+      end      
     end
     
-    class Checkbox < ClickableElement
-      alias :set :click
+    class Button < InputElement
     end
-
-    class Label < ClickableElement
-      protected
-      
-      def operate_by_text(&block)
-        @scripter.operate_on_label(self, &block)
-      end
-    end
-
-    class Link < ClickableElement
-      def click
-        @scripter.highlight(self) do
-          click_link
-        end
-      end
-    end
-
-    class Radio < ClickableElement
+    
+    class Checkbox < InputElement
       def_init :scripter, :how, :what, :value
       def by_value
         @value
@@ -98,21 +106,50 @@ module Watir
       alias :set :click
     end
 
-    class SelectList < ClickableElement
+    class Div < ContentElement
+    end
+
+    class Label < ContentElement
+      protected
+      
+      def operate_by_text(&block)
+        @scripter.operate_on_label(self, &block)
+      end
+    end
+
+    class Link < InputElement
+      def click
+        @scripter.highlight(self) do
+          click_link
+        end
+      end
+    end
+
+    class Radio < Checkbox
+    end
+
+    class SelectList < InputElement
       def select(label)
         @scripter.highlight(self) do
-          select_option("text", label)
+          select_option(:text, label)
         end
       end
 
       def select_value(value)
         @scripter.highlight(self) do
-          select_option("value", value)
+          select_option(:value, value)
         end
+      end
+      
+      def speak
+        @scripter.speak_options_for(self)
       end
     end
 
-    class TextField < ClickableElement
+    class Span < ContentElement
+    end
+
+    class TextField < InputElement
       def set(value)
         @scripter.highlight(self) do
           clear_text_input
@@ -120,6 +157,15 @@ module Watir
             append_text_input(value[i, 1])
           end
         end
+      end
+      
+      def getContents
+        @scripter.get_value_for(self)
+      end
+      
+      def verify_contains(expected)
+        actual = getContents
+        expected == actual
       end
     end
 
@@ -162,8 +208,12 @@ module Watir
       Button.new(scripter, how, what)
     end
 
-    def checkbox(how, what)
-      Checkbox.new(scripter, how, what)
+    def checkbox(how, what, value = nil)
+      Checkbox.new(scripter, how, what, value)
+    end
+
+    def div(how, what)
+      Div.new(scripter, how, what)
     end
 
     def form(how, what)
@@ -192,6 +242,10 @@ module Watir
 
     def select_list(how, what)
       SelectList.new(scripter, how, what)
+    end
+    
+    def span(how, what)
+      Span.new(scripter, how, what)
     end
     
     def text_field(how, what)
