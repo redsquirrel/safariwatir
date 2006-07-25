@@ -7,8 +7,8 @@ require 'safariwatir'
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
-# Unsupported Elements: UL/OL
-# Use dynamic properties for Javascript optimization?
+# Unsupported Elements: UL/OL, TABLE, TR, TD
+# Use dynamic properties for Javascript optimization? Or use global lookup table?
 # Will I need to push more functionality into AppleScript to speed things up?
 # Angrez is looking into the Ruby/AppleScript binding
 # Watir Rails Plugin needed -> Watir test generator, fixtures and AR in-test, Browser Factory
@@ -92,6 +92,14 @@ def safari.redsquirrel
   end
 end
 
+def safari.weinberg
+  goto("http://www.geraldmweinberg.com/")
+  puts "FAILURE weinberg menu" unless frame("menu").contains_text("Jerry Weinberg's Site")
+  frame("menu").link(:text, "Books").click
+  frame("menu").link(:text, /psychology/i).click
+  puts "FAILURE weinberg content" unless frame("content").contains_text("Silver Anniversary")  
+end
+
 safari.google_to_prag
 safari.ala
 safari.amazon
@@ -99,5 +107,6 @@ safari.google_advanced
 safari.reddit
 safari.colbert
 safari.redsquirrel
+safari.weinberg
 
-safari.close
+# safari.close

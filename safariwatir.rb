@@ -5,22 +5,37 @@ require 'safariwatir/core_ext'
 module Watir
   include Watir::Exception
 
-  module Clickable
-    def click
-      @scripter.highlight(self) do
-        click_element
-      end
-    end    
-  end
+  module Container
 
-  module Elements
+    attr_reader :scripter
+    private :scripter
+
+    module Clickable
+      def click
+        @scripter.highlight(self) do
+          click_element
+        end
+      end    
+    end
+
     class AlertWindow
       def initialize(scripter)
         @scripter = scripter
       end
       
       def click
-        @scripter.click_alert_ok
+          @scripter.click_alert_ok
+      end
+    end
+
+    class Frame
+      include Container
+      
+      attr_reader :name
+      
+      def initialize(scripter, name)
+        @name = name
+        @scripter = scripter.for_frame(self)
       end
     end
 
@@ -171,39 +186,10 @@ module Watir
 
     class Password < TextField
     end
-  end
-  
-  class Safari
-    include Elements
 
-    attr_reader :scripter
 
-    def self.start(url = nil)
-      safari = new
-      safari.goto(url) if url
-      safari
-    end
+    # Elements
     
-    def initialize
-      @scripter = AppleScripter.new
-    end
-    
-    def close
-      scripter.close
-    end
-    
-    def quit
-      scripter.quit
-    end
-
-    def alert
-      AlertWindow.new(scripter)
-    end
-    
-    def goto(url)
-      scripter.navigate_to(url)
-    end
-
     def button(how, what)
       Button.new(scripter, how, what)
     end
@@ -220,6 +206,10 @@ module Watir
       Form.new(scripter, how, what)
     end
 
+    def frame(name)
+      Frame.new(scripter, name)
+    end
+    
     def image(how, what)
       Button.new(scripter, how, what)
     end
@@ -255,13 +245,43 @@ module Watir
     def contains_text(what)
       text = scripter.document_text
       case what
-        when Regexp:
-          text =~ what
-        when String:
-          text.index(what)
-        else
-          raise MissingWayOfFindingObjectException
-        end
+      when Regexp:
+        text =~ what
+      when String:
+        text.index(what)
+      else
+        raise MissingWayOfFindingObjectException
+      end
+    end
+  end
+
+  class Safari
+    include Container
+
+    def self.start(url = nil)
+      safari = new
+      safari.goto(url) if url
+      safari
+    end
+    
+    def initialize
+      @scripter = AppleScripter.new
+    end
+    
+    def close
+      scripter.close
+    end
+    
+    def quit
+      scripter.quit
+    end
+
+    def alert
+      AlertWindow.new(scripter)
+    end
+    
+    def goto(url)
+      scripter.navigate_to(url)
     end
   end # class Safari
 end

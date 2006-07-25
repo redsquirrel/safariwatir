@@ -1,33 +1,49 @@
+require File.dirname(__FILE__) + '/core_ext'
+require File.dirname(__FILE__) + '/../watir/exceptions'
+
 module Watir
-  NOT_FOUND = "__safari_watir_unfound__"
+  ELEMENT_NOT_FOUND = "__safari_watir_element_unfound__"
+  FRAME_NOT_FOUND = "__safari_watir_frame_unfound__"
   NO_RESPONSE = "__safari_watir_no_response__"
 
-  module JavaScripter
-    def js_operation(locator, operation)
-      js_wrapper(%|
+  class JavaScripter
+    def initialize(container = nil)
+      @frame_container = container
+    end
+    
+    def operate(locator, operation)
+      wrap(%|
 #{locator}
 if (element) {
   #{operation}
 } else {
-  return '#{NOT_FOUND}';
+  return '#{ELEMENT_NOT_FOUND}';
 }|)
     end
     
-    def js_wrapper(script)
+    def wrap(script)
+      if @frame_container
+        # add in frame name when referencing parent or document
+        script.gsub! "parent", "parent.#{@frame_container}"
+        script.gsub! "document", "#{@frame_container}.document"
+      end
       %|set response to do JavaScript "#{script}" in document 1|
     end
   end
   
   class AppleScripter
-    include JavaScripter
     include Watir::Exception
+    
+    attr_reader :js
+    private :js
     
     TIMEOUT = 10
   
-    def initialize
-      ensure_window_ready
+    def initialize(frame_control = nil)
+      ensure_window_ready unless frame_control
+      @js = frame_control || JavaScripter.new
     end
-          
+              
     def close
       execute(%|close document 1|)
     end
@@ -40,16 +56,8 @@ if (element) {
       execute_and_wait(%|set URL in document 1 to "#{url}"|)
     end
 
-    def speak_value_of(element = @element)
-      speak(get_value_for(element))
-    end
-
     def get_text_for(element = @element)
       execute(element.operate { %|return element.innerText| }, element)
-    end
-
-    def speak_text_of(element = @element)
-      speak(element.text)
     end
 
     def get_value_for(element = @element)
@@ -57,7 +65,7 @@ if (element) {
     end
       
     def document_text
-      execute(js_wrapper(%|document.getElementsByTagName('BODY').item(0).innerText;|))
+      execute(js.wrap(%|document.getElementsByTagName('BODY').item(0).innerText;|))
     end
       
     def highlight(element, &block)
@@ -72,19 +80,6 @@ element.style.backgroundColor = 'yellow';|
       @element = nil
 
       execute_and_ignore(element.operate { %|element.style.backgroundColor = element.originalColor;| })
-    end
-
-    def speak_options_for(element = @element)
-      values = execute(element.operate do
-%|var values = '';
-for (var i = 0; i < element.options.length; i++) {
-  if (element.options[i].selected == true) {
-    values += ' ' + element.options[i].text;
-  }
-}
-return values|
-      end, element)
-      speak(values)
     end
 
     def select_option(option_how, option_what, element = @element)
@@ -114,22 +109,45 @@ element.setSelectionRange(element.value.length, element.value.length);|
     end
   
     def click_link(element = @element)      
-      click = find_link(element) + %|
+      click = %/
+function baseTarget() {
+  var bases = document.getElementsByTagName('BASE');
+  if (bases.length > 0) {
+    return bases[0].target;
+  } else {
+    return;
+  }
+}
+function undefinedTarget(target) {
+  return target == undefined || target == '';
+}
+function topTarget(target) {
+  return undefinedTarget(target) || target == '_top';
+}
+function nextLocation(element) {
+  var target = element.target;
+  if (undefinedTarget(target) && baseTarget()) {
+    top[baseTarget()].location = element.href;
+  } else if (topTarget(target)) {
+    top.location = element.href;
+  } else {
+    top[target].location = element.href;    
+  }
+}
 var click = document.createEvent('HTMLEvents');
 click.initEvent('click', true, true);
 if (element.onclick) {
  	if (false != element.onclick(click)) {
-		return element.href;
+		nextLocation(element);
 	}
 } else {
-	return element.href;
-}|
-      execute_and_wait(%|set target to do JavaScript "#{click}" in document 1
-set URL in document 1 to target|)
+	nextLocation(element);
+}/
+      execute_and_wait(js.operate(find_link(element), click))
     end
 
     def operate_on_link(element)
-      js_operation(find_link(element), yield)
+      js.operate(find_link(element), yield)
     end
 
     def find_link(element)
@@ -147,7 +165,7 @@ for (var i = 0; i < document.links.length; i++) {
       how = {:text => "text", :url => "href"}[element.how]
       case element.what
         when Regexp:
-          %|#{how}.match(/#{element.what.source}/)|          
+          %|#{how}.match(/#{element.what.source}/#{element.what.casefold? ? "i":nil})|          
         when String:
           %|#{how} == '#{element.what}'|
       end
@@ -155,7 +173,7 @@ for (var i = 0; i < document.links.length; i++) {
     private :handle_match
   
     def operate_by_input_value(element)
-      js_operation(%|
+      js.operate(%|
 var elements = document.getElementsByTagName('INPUT');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
@@ -169,7 +187,7 @@ for (var i = 0; i < elements.length; i++) {
     end
 
     def operate_by_name(element)
-      js_operation(%|
+      js.operate(%|
 var elements = document.getElementsByName('#{element.what}');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
@@ -192,15 +210,15 @@ for (var i = 0; i < elements.length; i++) {
     private :handle_form_element_name_match
 
     def operate_by_id(element)
-      js_operation("var element = document.getElementById('#{element.what}');", yield)
+      js.operate("var element = document.getElementById('#{element.what}');", yield)
     end
 
     def operate_by_index(element)
-      js_operation(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what}];|, yield)
+      js.operate(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what}];|, yield)
     end
 
     def operate_on_label(element)
-      js_operation(%|var elements = document.getElementsByTagName('LABEL');
+      js.operate(%|var elements = document.getElementsByTagName('LABEL');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
   if (elements[i].innerText == '#{element.what}') {
@@ -223,6 +241,37 @@ tell window 1
 end tell|)
     end 
 
+    def for_frame(frame)
+      # verify the frame exists
+      execute(js.wrap(%|
+if (parent.#{frame.name} == undefined) {
+  return '#{FRAME_NOT_FOUND}';
+}|), frame)
+      AppleScripter.new(JavaScripter.new("parent.#{frame.name}"))
+    end
+
+    def speak_value_of(element = @element)
+      speak(get_value_for(element))
+    end
+
+    def speak_text_of(element = @element)
+      speak(element.text)
+    end
+
+    def speak_options_for(element = @element)
+      values = execute(element.operate do
+%|var values = '';
+for (var i = 0; i < element.options.length; i++) {
+  if (element.options[i].selected == true) {
+    values += ' ' + element.options[i].text;
+  }
+}
+return values|
+      end, element)
+      speak(values)
+    end    
+
+
     private
 
     def execute!(script)
@@ -239,10 +288,12 @@ SCRIPT`.chomp
     def execute(script, element = nil)
       response = execute! script
       case response
-        when NOT_FOUND:
-          raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}." 
         when NO_RESPONSE:
           nil
+        when ELEMENT_NOT_FOUND:
+          raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}." 
+        when FRAME_NOT_FOUND:
+          raise UnknownFrameException, "Unable to locate a frame with name #{element.name}." 
         else
           response
       end
@@ -264,11 +315,13 @@ SCRIPT`
     end
 
     def execute_and_wait(script, element = nil)
+      
       execute(%|
 #{script}
 delay 2
 repeat with i from 1 to #{TIMEOUT}
-  if (do JavaScript "document.readyState" in document 1) is "complete" then
+  #{js.wrap("document.readyState")}
+  if (response) is "complete" then
     exit repeat
   else
     delay 1
@@ -290,6 +343,6 @@ end if|)
 say "#{string.quote_safe}"
 SCRIPT`
       nil
-    end
+    end 
   end # class AppleScripter
 end
