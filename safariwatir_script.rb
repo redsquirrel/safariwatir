@@ -3,11 +3,11 @@ require 'safariwatir'
 
 # TODO 
 # Need to give feedback when browser dies
-# Be more attached to the Safari window, if a different window is selected, the AppleScript executes against it
+# Be more attached to the Safari window. Currently, if a different window is selected, the AppleScript executes against it.
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
-# Unsupported Elements: UL/OL, TABLE, TR, TD
+# Unsupported Elements: Have I missed any???
 # Use dynamic properties for Javascript optimization? Or use global lookup table?
 # Will I need to push more functionality into AppleScript to speed things up?
 # Angrez is looking into the Ruby/AppleScript binding
@@ -100,6 +100,12 @@ def safari.weinberg
   puts "FAILURE weinberg content" unless frame("content").contains_text("Silver Anniversary")  
 end
 
+def safari.basecamp
+  goto("http://basecamphq.com/")
+  puts "FAILURE basecamp content" unless table(:index, 1)[1][2].text =~ /What is Basecamp\?/
+  puts "FAILURE basecamp counts" # TODO
+end
+
 safari.google_to_prag
 safari.ala
 safari.amazon
@@ -108,5 +114,6 @@ safari.reddit
 safari.colbert
 safari.redsquirrel
 safari.weinberg
+safari.basecamp
 
-# safari.close
+safari.close

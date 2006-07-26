@@ -164,6 +164,58 @@ module Watir
     class Span < ContentElement
     end
 
+    class Table
+      def_init :scripter, :how, :what
+      attr_reader :how, :what
+      
+      def each
+        
+      end
+      
+      def [](index)
+        TableRow.new(@scripter, self, index)
+      end
+      
+      def row_count
+        
+      end
+      
+      def column_count
+
+      end
+      
+    end
+    
+    class TableRow
+      def_init :scripter, :table, :index
+      attr_reader :table, :index
+      
+      def each
+        
+      end
+      
+      def [](index)
+        TableCell.new(@scripter, self, index)
+      end
+
+      def column_count
+
+      end
+    end
+    
+    class TableCell
+      def_init :scripter, :row, :index
+      attr_reader :row, :index
+
+      def text
+        @scripter.get_table_cell_text(self)
+      end
+
+      def speak
+        @scripter.speak_text_of(self)
+      end      
+    end
+
     class TextField < InputElement
       def set(value)
         @scripter.highlight(self) do
@@ -236,6 +288,10 @@ module Watir
     
     def span(how, what)
       Span.new(scripter, how, what)
+    end
+
+    def table(how, what)
+      Table.new(scripter, how, what)
     end
     
     def text_field(how, what)

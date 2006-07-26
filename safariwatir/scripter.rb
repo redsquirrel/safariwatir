@@ -5,6 +5,7 @@ module Watir
   ELEMENT_NOT_FOUND = "__safari_watir_element_unfound__"
   FRAME_NOT_FOUND = "__safari_watir_frame_unfound__"
   NO_RESPONSE = "__safari_watir_no_response__"
+  TABLE_CELL_NOT_FOUND = "__safari_watir_cell_unfound__"
 
   class JavaScripter
     def initialize(container = nil)
@@ -58,6 +59,22 @@ if (element) {
 
     def get_text_for(element = @element)
       execute(element.operate { %|return element.innerText| }, element)
+    end
+
+    def get_table_cell_text(element = @element)
+      table_index = element.row.table.what - 1
+      row_index = element.row.index - 1
+      cell_index = element.index - 1
+      
+      execute(js.wrap(%|
+var element;
+try {
+  element = document.getElementsByTagName('TABLE')[#{table_index}].rows[#{row_index}].cells[#{cell_index}];
+} catch(error) {}
+if (element == undefined) {
+  return '#{TABLE_CELL_NOT_FOUND}';
+}
+return element.innerText;|))
     end
 
     def get_value_for(element = @element)
@@ -292,6 +309,8 @@ SCRIPT`.chomp
           nil
         when ELEMENT_NOT_FOUND:
           raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}." 
+        when TABLE_CELL_NOT_FOUND:
+          raise UnknownCellException, "Unable to locate a table cell." 
         when FRAME_NOT_FOUND:
           raise UnknownFrameException, "Unable to locate a frame with name #{element.name}." 
         else
