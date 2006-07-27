@@ -169,51 +169,59 @@ module Watir
       attr_reader :how, :what
       
       def each
-        
+        # TODO
       end
       
       def [](index)
-        TableRow.new(@scripter, self, index)
+        TableRow.new(@scripter, :index, index, self)
       end
       
       def row_count
-        
+        # TODO
       end
       
       def column_count
-
+        # TODO
       end
       
     end
     
     class TableRow
-      def_init :scripter, :table, :index
-      attr_reader :table, :index
+      def initialize(scripter, how, what, table = nil)
+        @scripter = scripter
+        @how = how
+        @what = what
+        @table = table
+      end
+
+      attr_reader :table, :how, :what
       
       def each
-        
+        # TODO
       end
       
       def [](index)
-        TableCell.new(@scripter, self, index)
+        TableCell.new(@scripter, :index, index, self)
       end
 
       def column_count
-
+        # TODO
       end
     end
     
-    class TableCell
-      def_init :scripter, :row, :index
-      attr_reader :row, :index
-
-      def text
-        @scripter.get_table_cell_text(self)
+    class TableCell < ContentElement
+      def initialize(scripter, how, what, row = nil)
+        @scripter = scripter
+        @how = how
+        @what = what
+        @row = row
       end
+      
+      attr_reader :how, :what, :row
 
-      def speak
-        @scripter.speak_text_of(self)
-      end      
+      def operate_by_index(&block)
+        @scripter.operate_by_table_cell_index(self, &block)
+      end
     end
 
     class TextField < InputElement
@@ -244,6 +252,10 @@ module Watir
     
     def button(how, what)
       Button.new(scripter, how, what)
+    end
+
+    def cell(how, what)
+      TableCell.new(scripter, how, what)
     end
 
     def checkbox(how, what, value = nil)
@@ -280,6 +292,10 @@ module Watir
 
     def radio(how, what, value = nil)
       Radio.new(scripter, how, what, value)
+    end
+
+    def row(how, what)
+      TableRow.new(scripter, how, what)
     end
 
     def select_list(how, what)

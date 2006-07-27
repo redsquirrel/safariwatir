@@ -7,7 +7,7 @@ require 'safariwatir'
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
-# Unsupported Elements: Have I missed any???
+# Unsupported Elements: Div/Span/TD's should have link, button, etc., Javascript confirm [OK/CANCEL], Javascript popup windows
 # Use dynamic properties for Javascript optimization? Or use global lookup table?
 # Will I need to push more functionality into AppleScript to speed things up?
 # Angrez is looking into the Ruby/AppleScript binding
@@ -100,10 +100,18 @@ def safari.weinberg
   puts "FAILURE weinberg content" unless frame("content").contains_text("Silver Anniversary")  
 end
 
-def safari.basecamp
+def safari.tables
   goto("http://basecamphq.com/")
   puts "FAILURE basecamp content" unless table(:index, 1)[1][2].text =~ /What is Basecamp\?/
-  puts "FAILURE basecamp counts" # TODO
+
+  goto("http://www.jimthatcher.com/webcourse9.htm")
+  puts "FAILURE thatcher" unless cell(:id, "c5").text == "subtotals"
+
+  goto("http://amazon.com/")
+  puts "FAILURE amazon tr" unless row(:id, "twotabtop")[2].text =~ /Your\s+Store/
+  
+  goto("http://www.dreamweaverresources.com/tutorials/tableborder.htm")
+  puts "FAILURE dreamweaver" unless table(:id, "titletable")[1][1].text =~ /CSS/
 end
 
 safari.google_to_prag
@@ -114,6 +122,6 @@ safari.reddit
 safari.colbert
 safari.redsquirrel
 safari.weinberg
-safari.basecamp
+safari.tables
 
 safari.close

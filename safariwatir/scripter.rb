@@ -61,22 +61,41 @@ if (element) {
       execute(element.operate { %|return element.innerText| }, element)
     end
 
-    def get_table_cell_text(element = @element)
-      table_index = element.row.table.what - 1
-      row_index = element.row.index - 1
-      cell_index = element.index - 1
-      
-      execute(js.wrap(%|
+    def operate_by_table_cell_index(element = @element)      
+      js.wrap(%|
 var element;
 try {
-  element = document.getElementsByTagName('TABLE')[#{table_index}].rows[#{row_index}].cells[#{cell_index}];
+  element = document.#{find_cell(element)};
 } catch(error) {}
 if (element == undefined) {
   return '#{TABLE_CELL_NOT_FOUND}';
 }
-return element.innerText;|))
+#{yield}|)
     end
-
+    
+    def find_cell(element)      
+      finder = 
+      case element.row.how
+      when :id:
+        %|getElementById('#{element.row.what}')|
+      when :index:
+        case element.row.table.how
+        when :id
+          %|getElementById('#{element.row.table.what}').rows[#{element.row.what-1}]|
+        when :index:
+          %|getElementsByTagName('TABLE')[#{element.row.table.what-1}].rows[#{element.row.what-1}]|
+        else
+          raise MissingWayOfFindingObjectException, "Table element does not support #{element.row.table.how}"
+        end
+      else
+        raise MissingWayOfFindingObjectException, "TableRow element does not support #{element.row.how}"
+      end
+          
+      
+      finder + %|.cells[#{element.what-1}]|
+    end
+    private :find_cell
+    
     def get_value_for(element = @element)
       execute(element.operate { %|return element.value;| }, element)
     end
@@ -308,11 +327,11 @@ SCRIPT`.chomp
         when NO_RESPONSE:
           nil
         when ELEMENT_NOT_FOUND:
-          raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}." 
+          raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}" 
         when TABLE_CELL_NOT_FOUND:
-          raise UnknownCellException, "Unable to locate a table cell." 
+          raise UnknownCellException, "Unable to locate a table cell with #{element.how} of #{element.what}"
         when FRAME_NOT_FOUND:
-          raise UnknownFrameException, "Unable to locate a frame with name #{element.name}." 
+          raise UnknownFrameException, "Unable to locate a frame with name #{element.name}" 
         else
           response
       end
