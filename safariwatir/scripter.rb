@@ -7,11 +7,7 @@ module Watir
   NO_RESPONSE = "__safari_watir_no_response__"
   TABLE_CELL_NOT_FOUND = "__safari_watir_cell_unfound__"
 
-  class JavaScripter
-    def initialize(container = nil)
-      @frame_container = container
-    end
-    
+  class JavaScripter    
     def operate(locator, operation)
       wrap(%|
 #{locator}
@@ -23,12 +19,54 @@ if (element) {
     end
     
     def wrap(script)
-      if @frame_container
-        # add in frame name when referencing parent or document
-        script.gsub! "parent", "parent.#{@frame_container}"
-        script.gsub! "document", "#{@frame_container}.document"
-      end
+      script.gsub! "DOCUMENT", "document"
       %|set response to do JavaScript "#{script}" in document 1|
+    end
+
+    def find_cell(cell)
+      return %|getElementById('#{cell.what}')| if cell.how == :id
+      raise RuntimeError, "Unable to use #{cell.how} to find TableCell" unless cell.row
+
+      finder = 
+      case cell.row.how
+      when :id:
+        %|getElementById('#{cell.row.what}')|
+      when :index:
+        case cell.row.table.how
+        when :id
+          %|getElementById('#{cell.row.table.what}').rows[#{cell.row.what-1}]|
+        when :index:
+          %|getElementsByTagName('TABLE')[#{cell.row.table.what-1}].rows[#{cell.row.what-1}]|
+        else
+          raise MissingWayOfFindingObjectException, "Table element does not support #{cell.row.table.how}"
+        end
+      else
+        raise MissingWayOfFindingObjectException, "TableRow element does not support #{cell.row.how}"
+      end
+      
+      finder + %|.cells[#{cell.what-1}]|
+    end
+  end
+
+  class FrameJavaScripter < JavaScripter
+    def initialize(frame)
+      @page_container = "parent.#{frame.name}"
+    end
+
+    def wrap(script)
+      # add in frame name when referencing parent or document
+      script.gsub! "parent", "parent.#{@page_container}"
+      script.gsub! "document", "#{@page_container}.document"
+      super(script)
+    end
+  end
+
+  class TableJavaScripter < JavaScripter
+    def_init :cell
+    
+    def wrap(script)
+      script.gsub! "document", "document." + find_cell(@cell)
+      super(script)
     end
   end
   
@@ -40,11 +78,19 @@ if (element) {
     
     TIMEOUT = 10
   
-    def initialize(frame_control = nil)
-      ensure_window_ready unless frame_control
-      @js = frame_control || JavaScripter.new
+    def initialize(scripter = JavaScripter.new)
+      @js = scripter
     end
               
+    def ensure_window_ready
+      execute(%|
+activate
+set document_list to every document
+if length of document_list is 0 then
+	make new document
+end if|)      
+    end
+
     def close
       execute(%|close document 1|)
     end
@@ -61,41 +107,15 @@ if (element) {
       execute(element.operate { %|return element.innerText| }, element)
     end
 
-    def operate_by_table_cell_index(element = @element)      
+    def operate_by_table_cell(element = @element)      
       js.wrap(%|
-var element;
-try {
-  element = document.#{find_cell(element)};
-} catch(error) {}
+var element = document;
 if (element == undefined) {
   return '#{TABLE_CELL_NOT_FOUND}';
 }
 #{yield}|)
     end
-    
-    def find_cell(element)      
-      finder = 
-      case element.row.how
-      when :id:
-        %|getElementById('#{element.row.what}')|
-      when :index:
-        case element.row.table.how
-        when :id
-          %|getElementById('#{element.row.table.what}').rows[#{element.row.what-1}]|
-        when :index:
-          %|getElementsByTagName('TABLE')[#{element.row.table.what-1}].rows[#{element.row.what-1}]|
-        else
-          raise MissingWayOfFindingObjectException, "Table element does not support #{element.row.table.how}"
-        end
-      else
-        raise MissingWayOfFindingObjectException, "TableRow element does not support #{element.row.how}"
-      end
-          
-      
-      finder + %|.cells[#{element.what-1}]|
-    end
-    private :find_cell
-    
+        
     def get_value_for(element = @element)
       execute(element.operate { %|return element.value;| }, element)
     end
@@ -170,7 +190,7 @@ function nextLocation(element) {
     top[target].location = element.href;    
   }
 }
-var click = document.createEvent('HTMLEvents');
+var click = DOCUMENT.createEvent('HTMLEvents');
 click.initEvent('click', true, true);
 if (element.onclick) {
  	if (false != element.onclick(click)) {
@@ -187,6 +207,10 @@ if (element.onclick) {
     end
 
     def find_link(element)
+      case element.how
+      when :index:
+%|var element = document.getElementsByTagName('A')[#{element.what-1}];|
+      else
 %|var element = undefined;
 for (var i = 0; i < document.links.length; i++) {
   if (document.links[i].#{handle_match(element)}) {
@@ -194,6 +218,7 @@ for (var i = 0; i < document.links.length; i++) {
     break;
   }
 }|
+      end
     end
     private :find_link
 
@@ -204,6 +229,8 @@ for (var i = 0; i < document.links.length; i++) {
           %|#{how}.match(/#{element.what.source}/#{element.what.casefold? ? "i":nil})|          
         when String:
           %|#{how} == '#{element.what}'|
+        else
+          raise RuntimeError, "Unable to locate #{element.name} with #{element.how}"
       end
     end
     private :handle_match
@@ -250,7 +277,7 @@ for (var i = 0; i < elements.length; i++) {
     end
 
     def operate_by_index(element)
-      js.operate(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what}];|, yield)
+      js.operate(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what-1}];|, yield)
     end
 
     def operate_on_label(element)
@@ -277,13 +304,17 @@ tell window 1
 end tell|)
     end 
 
-    def for_frame(frame)
+    def for_table(element)
+      AppleScripter.new(TableJavaScripter.new(element))
+    end
+
+    def for_frame(element)
       # verify the frame exists
       execute(js.wrap(%|
-if (parent.#{frame.name} == undefined) {
+if (parent.#{element.name} == undefined) {
   return '#{FRAME_NOT_FOUND}';
-}|), frame)
-      AppleScripter.new(JavaScripter.new("parent.#{frame.name}"))
+}|), element)
+      AppleScripter.new(FrameJavaScripter.new(element))
     end
 
     def speak_value_of(element = @element)
@@ -306,6 +337,13 @@ return values|
       end, element)
       speak(values)
     end    
+
+    def speak(string)
+`osascript <<SCRIPT
+say "#{string.quote_safe}"
+SCRIPT`
+      nil
+    end 
 
 
     private
@@ -366,21 +404,5 @@ repeat with i from 1 to #{TIMEOUT}
   end if
 end repeat|, element)
     end
-  
-    def ensure_window_ready
-      execute(%|
-activate
-set document_list to every document
-if length of document_list is 0 then
-	make new document
-end if|)      
-    end
-    
-    def speak(string)
-`osascript <<SCRIPT
-say "#{string.quote_safe}"
-SCRIPT`
-      nil
-    end 
   end # class AppleScripter
 end

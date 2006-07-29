@@ -7,7 +7,7 @@ require 'safariwatir'
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
-# Unsupported Elements: Div/Span/TD's should have link, button, etc., Javascript confirm [OK/CANCEL], Javascript popup windows
+# Unsupported Elements: P, Div/Span/TD should have link, button, etc., Javascript confirm [OK/CANCEL], Javascript popup windows
 # Use dynamic properties for Javascript optimization? Or use global lookup table?
 # Will I need to push more functionality into AppleScript to speed things up?
 # Angrez is looking into the Ruby/AppleScript binding
@@ -24,7 +24,7 @@ def safari.google_to_prag
   goto("http://google.com")
   text_field(:name, "q").set("pickaxe")
   button(:name, "btnG").click
-  link(:text, "The Pragmatic Programmers, LLC: Programming Ruby").click
+  link(:text, "Programming Ruby, 2nd Ed.").click
   link(:url, "http://www.pragmaticprogrammer.com/titles/ruby/code/index.html").click
   link(:text, "Catalog").click
   link(:text, "All Books").click
@@ -65,7 +65,7 @@ def safari.reddit
   goto("http://reddit.com/")
   text_field(:name, "user").set("foo")
   password(:name, "passwd").set("bar")
-  form(:index, 1).submit
+  form(:index, 2).submit
   puts "FAILURE reddit" unless contains_text("foo") and contains_text("logout")  
 end
 
@@ -103,13 +103,19 @@ end
 def safari.tables
   goto("http://basecamphq.com/")
   puts "FAILURE basecamp content" unless table(:index, 1)[1][2].text =~ /What is Basecamp\?/
-
+  
   goto("http://www.jimthatcher.com/webcourse9.htm")
   puts "FAILURE thatcher" unless cell(:id, "c5").text == "subtotals"
-
-  goto("http://amazon.com/")
-  puts "FAILURE amazon tr" unless row(:id, "twotabtop")[2].text =~ /Your\s+Store/
   
+  goto("http://amazon.com/")
+  if contains_text("If you're not")
+    link(:text, "click here").click
+  end
+    
+  puts "FAILURE amazon tr" unless row(:id, "twotabtop")[2].text =~ /Your\s+Store/
+  row(:id, "twotabtop")[2].link(:index, 1).click
+  puts "FAILURE amazon link" unless contains_text("Welcome to Your Store")
+    
   goto("http://www.dreamweaverresources.com/tutorials/tableborder.htm")
   puts "FAILURE dreamweaver" unless table(:id, "titletable")[1][1].text =~ /CSS/
 end

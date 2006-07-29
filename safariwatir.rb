@@ -5,8 +5,17 @@ require 'safariwatir/core_ext'
 module Watir
   include Watir::Exception
 
-  module Container
+  module PageContainer
+    def html
+      @scripter.document_html
+    end
+    
+    def text
+      @scripter.document_text
+    end
+  end
 
+  module Container
     attr_reader :scripter
     private :scripter
 
@@ -30,6 +39,7 @@ module Watir
 
     class Frame
       include Container
+      include PageContainer
       
       attr_reader :name
       
@@ -43,9 +53,13 @@ module Watir
       def_init :scripter, :how, :what
       attr_reader :how, :what
 
-      # Hooks for subclasses
-      def tag; end
-      def speak; end
+      def tag
+        raise RuntimeError, "tag not provided for #{name}"
+      end
+
+      def speak
+        @scripter.speak("#{name}'s don't know how to speak.")
+      end
 
       def name
         self.class.name.split("::").last
@@ -94,12 +108,15 @@ module Watir
         @scripter.speak_value_of(self)
       end
 
+      def tag; "INPUT"; end
+
       # Hooks for subclasses
       def by_value; end
     end
     
     class ContentElement < HtmlElement
       include Clickable
+      include Container
 
       def text
         @scripter.get_text_for(self)
@@ -122,9 +139,12 @@ module Watir
     end
 
     class Div < ContentElement
+      def tag; "DIV"; end
     end
 
     class Label < ContentElement
+      def tag; "LABEL"; end
+      
       protected
       
       def operate_by_text(&block)
@@ -133,6 +153,8 @@ module Watir
     end
 
     class Link < InputElement
+      def tag; "A"; end
+
       def click
         @scripter.highlight(self) do
           click_link
@@ -162,6 +184,7 @@ module Watir
     end
 
     class Span < ContentElement
+      def tag; "SPAN"; end
     end
 
     class Table
@@ -183,7 +206,6 @@ module Watir
       def column_count
         # TODO
       end
-      
     end
     
     class TableRow
@@ -195,7 +217,7 @@ module Watir
       end
 
       attr_reader :table, :how, :what
-      
+            
       def each
         # TODO
       end
@@ -211,7 +233,7 @@ module Watir
     
     class TableCell < ContentElement
       def initialize(scripter, how, what, row = nil)
-        @scripter = scripter
+        @scripter = scripter.for_table(self)
         @how = how
         @what = what
         @row = row
@@ -221,6 +243,10 @@ module Watir
 
       def operate_by_index(&block)
         @scripter.operate_by_table_cell_index(self, &block)
+      end
+
+      def operate(&block)
+        @scripter.operate_by_table_cell(self, &block)
       end
     end
 
@@ -315,7 +341,6 @@ module Watir
     end
     
     def contains_text(what)
-      text = scripter.document_text
       case what
       when Regexp:
         text =~ what
@@ -329,6 +354,7 @@ module Watir
 
   class Safari
     include Container
+    include PageContainer
 
     def self.start(url = nil)
       safari = new
@@ -338,6 +364,7 @@ module Watir
     
     def initialize
       @scripter = AppleScripter.new
+      @scripter.ensure_window_ready
     end
     
     def close
