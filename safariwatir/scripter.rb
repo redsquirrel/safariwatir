@@ -92,10 +92,6 @@ end if|)
     end
 
     def close
-      execute(%|close document 1|)
-    end
-
-    def quit
       execute(%|quit|)
     end
   
@@ -138,15 +134,37 @@ element.style.backgroundColor = 'yellow';|
       execute_and_ignore(element.operate { %|element.style.backgroundColor = element.originalColor;| })
     end
 
-    def select_option(option_how, option_what, element = @element)
+    def element_exists?(element = @element, &block)
+      block ||= Proc.new {}
+      execute(element.operate(&block), element)
+      return true
+      rescue UnknownObjectException
+      return false
+    end
+
+    def select_option(element = @element)
       execute(element.operate do
-%|for (var i = 0; i < element.options.length; i++) {
-  if (element.options[i].#{option_how} == '#{option_what}') {
-    element.options[i].selected = true;
-  }
-}|
+        handle_option(element, %|element.options[i].selected = true;|)
       end, element)
     end
+    
+    def option_exists?(element = @element)
+      element_exists?(element) { handle_option(element) }
+    end
+    
+    def handle_option(select_list, selection = nil)
+%|var option_found = false;
+for (var i = 0; i < element.options.length; i++) {
+  if (element.options[i].#{select_list.how} == '#{select_list.what}') {
+    #{selection}
+    option_found = true;
+  }
+}
+if (!option_found) {
+  return '#{ELEMENT_NOT_FOUND}';
+}|      
+    end
+    private :handle_option
     
     def clear_text_input(element = @element)
       execute(element.operate { %|element.value = '';| }, element)
@@ -161,7 +179,20 @@ element.setSelectionRange(element.value.length, element.value.length);|
 
     # TODO need a better approach for "waiting"
     def click_element(element = @element)
-      execute_and_wait(element.operate { %|element.click();| })
+      execute_and_wait(element.operate { %|
+if (element.click) {
+  element.click();
+} else {
+  var event = document.createEvent('MouseEvents');
+  event.initEvent('click', true, true);
+  element.dispatchEvent(event);
+
+  if (element.onclick) {
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent('click', true, true);
+    element.onclick(event);
+  }
+}| })
     end
   
     def click_link(element = @element)      
@@ -349,7 +380,6 @@ SCRIPT`
     private
 
     def execute!(script)
-# puts script
 `osascript <<SCRIPT
 tell application "Safari"
   set response to "#{NO_RESPONSE}"
@@ -390,8 +420,7 @@ SCRIPT`
       nil
     end
 
-    def execute_and_wait(script, element = nil)
-      
+    def execute_and_wait(script, element = nil)      
       execute(%|
 #{script}
 delay 2

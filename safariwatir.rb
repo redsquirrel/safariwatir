@@ -28,12 +28,10 @@ module Watir
     end
 
     class AlertWindow
-      def initialize(scripter)
-        @scripter = scripter
-      end
+      def_init :scripter
       
       def click
-          @scripter.click_alert_ok
+        @scripter.click_alert_ok
       end
     end
 
@@ -53,14 +51,21 @@ module Watir
       def_init :scripter, :how, :what
       attr_reader :how, :what
 
+      # overridden in derivitives
       def tag
         raise RuntimeError, "tag not provided for #{name}"
       end
 
+      # overridden in derivitives
       def speak
         @scripter.speak("#{name}'s don't know how to speak.")
       end
 
+      def exists?
+        @scripter.element_exists?(self)
+      end
+      alias :exist? :exists?
+      
       def name
         self.class.name.split("::").last
       end
@@ -110,7 +115,7 @@ module Watir
 
       def tag; "INPUT"; end
 
-      # Hooks for subclasses
+      # Hook for derivitives
       def by_value; end
     end
     
@@ -152,14 +157,14 @@ module Watir
       end
     end
 
-    class Link < InputElement
-      def tag; "A"; end
-
+    class Link < ContentElement
       def click
         @scripter.highlight(self) do
           click_link
         end
       end
+
+      def tag; "A"; end
     end
 
     class Radio < Checkbox
@@ -167,20 +172,43 @@ module Watir
 
     class SelectList < InputElement
       def select(label)
-        @scripter.highlight(self) do
-          select_option(:text, label)
-        end
+        option(:text, label).select
       end
-
+      
       def select_value(value)
-        @scripter.highlight(self) do
-          select_option(:value, value)
-        end
+        option(:value, value).select
+      end
+      
+      def option(how, what)
+        Option.new(@scripter, self, how, what)
       end
       
       def speak
         @scripter.speak_options_for(self)
       end
+      
+      def tag; "SELECT"; end
+    end
+
+    class Option < InputElement
+      def_init :scripter, :select_list, :how, :what
+      
+      def select
+        @scripter.highlight(self) do
+          select_option
+        end
+      end
+      
+      def operate(&block)
+        @select_list.operate(&block)
+      end
+
+      def exists?
+        @scripter.option_exists?(self)
+      end
+      alias :exist? :exists?
+      
+      def tag; "OPTION"; end
     end
 
     class Span < ContentElement

@@ -7,7 +7,7 @@ require 'safariwatir'
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
-# Unsupported Elements: P, Div/Span/TD should have link, button, etc., Javascript confirm [OK/CANCEL], Javascript popup windows
+# Unsupported Elements: Test that P/Div/Span/TD handle link, button, etc., Javascript confirm [OK/CANCEL], Javascript prompt, Javascript popup windows
 # Use dynamic properties for Javascript optimization? Or use global lookup table?
 # Will I need to push more functionality into AppleScript to speed things up?
 # Angrez is looking into the Ruby/AppleScript binding

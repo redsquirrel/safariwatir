@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name = %q{safariwatir}
-	s.version = "0.1.1"
+	s.version = "0.1.2"
 	s.rubyforge_project = 'safariwatir'
 	s.date = %q{2006-07-23}
 	s.summary = %q{Automated testing tool for web applications.}
