@@ -27,7 +27,9 @@ def safari.google_to_prag
   link(:text, "Programming Ruby, 2nd Ed.").click
   link(:url, "http://www.pragmaticprogrammer.com/titles/ruby/code/index.html").click
   link(:text, "Catalog").click
-  link(:text, "All Books").click
+  # site was down
+  # link(:text, "All Books").click
+  goto("http://pragmaticprogrammer.com/bookshelf/") # workaround
   link(:text, /Agile Retrospectives/).click
   puts "FAILURE prag" unless contains_text("Dave Hoover")  
 end
@@ -46,7 +48,7 @@ def safari.amazon
   select_list(:name, "url").select_value("index=software")
   text_field(:name, "keywords").set("Orion")
   image(:name, "Go").click
-  puts "FAILURE amazon" unless contains_text("Master of Orion (Original Release) (PC)")
+  puts "FAILURE amazon" unless contains_text("Master of Orion")
 end
 
 def safari.google_advanced
@@ -112,9 +114,9 @@ def safari.tables
     link(:text, "click here").click
   end
     
-  puts "FAILURE amazon tr" unless row(:id, "twotabtop")[2].text =~ /Your\s+Store/
+  puts "FAILURE amazon tr" unless row(:id, "twotabtop")[2].text =~ /Your\s+Amazon\.com/
   row(:id, "twotabtop")[2].link(:index, 1).click
-  puts "FAILURE amazon link" unless contains_text("Welcome to Your Store")
+  puts "FAILURE amazon link" unless contains_text("personalized recommendations")
     
   goto("http://www.dreamweaverresources.com/tutorials/tableborder.htm")
   puts "FAILURE dreamweaver" unless table(:id, "titletable")[1][1].text =~ /CSS/
