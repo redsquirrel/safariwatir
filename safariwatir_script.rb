@@ -2,16 +2,13 @@ require 'rubygems'
 require 'safariwatir'
 
 # TODO 
-# Need to give feedback when browser dies
 # Be more attached to the Safari window. Currently, if a different window is selected, the AppleScript executes against it.
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
 # Unsupported Elements: Test that P/Div/Span/TD handle link, button, etc., Javascript confirm [OK/CANCEL], Javascript prompt, Javascript popup windows
-# Use dynamic properties for Javascript optimization? Or use global lookup table?
-# Will I need to push more functionality into AppleScript to speed things up?
-# Angrez is looking into the Ruby/AppleScript binding
-# Watir Rails Plugin needed -> Watir test generator, fixtures and AR in-test, Browser Factory
+
+# Need to find a better way to distinguish between a submit button and a checkbox, re: page_load
 
 # SAFARI ISSUES
 # Labels are not clickable
@@ -44,9 +41,9 @@ end
 
 def safari.amazon
   goto("http://amazon.com")
-  select_list(:name, "url").select("Toys")
-  select_list(:name, "url").select_value("index=software")
-  text_field(:name, "keywords").set("Orion")
+  select_list(:name, "url").select("VHS")
+  select_list(:name, "url").select_value("search-alias=software")
+  text_field(:name, "field-keywords").set("Orion")
   image(:name, "Go").click
   puts "FAILURE amazon" unless contains_text("Master of Orion")
 end

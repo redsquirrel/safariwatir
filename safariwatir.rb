@@ -269,10 +269,6 @@ module Watir
       
       attr_reader :how, :what, :row
 
-      def operate_by_index(&block)
-        @scripter.operate_by_table_cell_index(self, &block)
-      end
-
       def operate(&block)
         @scripter.operate_by_table_cell(self, &block)
       end

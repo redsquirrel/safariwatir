@@ -1,5 +1,6 @@
 require File.dirname(__FILE__) + '/core_ext'
 require File.dirname(__FILE__) + '/../watir/exceptions'
+require 'appscript'
 
 module Watir
   ELEMENT_NOT_FOUND = "__safari_watir_element_unfound__"
@@ -9,20 +10,21 @@ module Watir
 
   class JavaScripter    
     def operate(locator, operation)
-      wrap(%|
-#{locator}
+%|#{locator}
 if (element) {
   #{operation}
 } else {
   return '#{ELEMENT_NOT_FOUND}';
-}|)
-    end
-    
-    def wrap(script)
-      script.gsub! "DOCUMENT", "document"
-      %|set response to do JavaScript "#{script}" in document 1|
+}|
     end
 
+    def wrap(script)
+      # Needed because createEvent must be called on a document, and the JavaScripter sub-classes
+      # do some transformations to lower-case "document" before we get here at runtime.
+      script.gsub! "DOCUMENT", "document"
+      script
+    end
+    
     def find_cell(cell)
       return %|getElementById('#{cell.what}')| if cell.how == :id
       raise RuntimeError, "Unable to use #{cell.how} to find TableCell" unless cell.row
@@ -80,23 +82,28 @@ if (element) {
   
     def initialize(scripter = JavaScripter.new)
       @js = scripter
+      @app = AS.app("Safari")
+      @document = @app.documents[1]
     end
               
     def ensure_window_ready
-      execute(%|
-activate
-set document_list to every document
-if length of document_list is 0 then
-	make new document
-end if|)      
+      @app.activate
+      @app.make(:new => :document) if @app.documents.get.size == 0
+      @document = @app.documents[1]
     end
 
     def close
-      execute(%|quit|)
+      @app.quit
     end
   
     def navigate_to(url)
-      execute_and_wait(%|set URL in document 1 to "#{url}"|)
+      page_load do
+        @document.URL.set(url)
+      end
+    end
+
+    def current_location
+      eval_js("window.location.href")
     end
 
     def get_text_for(element = @element)
@@ -104,12 +111,11 @@ end if|)
     end
 
     def operate_by_table_cell(element = @element)      
-      js.wrap(%|
-var element = document;
+%|var element = document;
 if (element == undefined) {
   return '#{TABLE_CELL_NOT_FOUND}';
 }
-#{yield}|)
+#{yield}|
     end
         
     def get_value_for(element = @element)
@@ -117,7 +123,7 @@ if (element == undefined) {
     end
       
     def document_text
-      execute(js.wrap(%|document.getElementsByTagName('BODY').item(0).innerText;|))
+      execute(%|document.getElementsByTagName('BODY').item(0).innerText;|)
     end
       
     def highlight(element, &block)
@@ -177,22 +183,23 @@ element.setSelectionRange(element.value.length, element.value.length);|
       end, element)
     end
 
-    # TODO need a better approach for "waiting"
     def click_element(element = @element)
-      execute_and_wait(element.operate { %|
+      page_load do
+        execute(element.operate { %|
 if (element.click) {
   element.click();
 } else {
-  var event = document.createEvent('MouseEvents');
+  var event = DOCUMENT.createEvent('MouseEvents');
   event.initEvent('click', true, true);
   element.dispatchEvent(event);
 
   if (element.onclick) {
-    var event = document.createEvent('HTMLEvents');
+    var event = DOCUMENT.createEvent('HTMLEvents');
     event.initEvent('click', true, true);
     element.onclick(event);
   }
 }| })
+      end
     end
   
     def click_link(element = @element)      
@@ -230,7 +237,9 @@ if (element.onclick) {
 } else {
 	nextLocation(element);
 }/
-      execute_and_wait(js.operate(find_link(element), click))
+      page_load do
+        execute(js.operate(find_link(element), click))
+      end
     end
 
     def operate_on_link(element)
@@ -271,11 +280,9 @@ for (var i = 0; i < document.links.length; i++) {
 var elements = document.getElementsByTagName('INPUT');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
-  if (elements[i].tagName != 'META') {
-    if (elements[i].value == '#{element.what}') {
-      element = elements[i];
-      break;
-    }
+  if (elements[i].value == '#{element.what}') {
+    element = elements[i];
+    break;
   }
 }|, yield)
     end
@@ -323,7 +330,9 @@ for (var i = 0; i < elements.length; i++) {
     end
 
     def submit_form(element)
-      execute_and_wait(element.operate { %|element.submit();| })
+      page_load do
+        execute(element.operate { %|element.submit();| })
+      end
     end
 
     def click_alert_ok
@@ -341,10 +350,10 @@ end tell|)
 
     def for_frame(element)
       # verify the frame exists
-      execute(js.wrap(%|
-if (parent.#{element.name} == undefined) {
+      execute(
+%|if (parent.#{element.name} == undefined) {
   return '#{FRAME_NOT_FOUND}';
-}|), element)
+}|, element)
       AppleScripter.new(FrameJavaScripter.new(element))
     end
 
@@ -379,18 +388,8 @@ SCRIPT`
 
     private
 
-    def execute!(script)
-`osascript <<SCRIPT
-tell application "Safari"
-  set response to "#{NO_RESPONSE}"
-	#{script}
-	response
-end tell
-SCRIPT`.chomp
-    end    
-    
     def execute(script, element = nil)
-      response = execute! script
+      response = eval_js(script)
       case response
         when NO_RESPONSE:
           nil
@@ -406,7 +405,7 @@ SCRIPT`.chomp
     end
     
     def execute_and_ignore(script)
-      execute! script
+      eval_js(script)
       nil
     end
 
@@ -419,19 +418,43 @@ end tell
 SCRIPT`
       nil
     end
+    
+    def page_load
+      last_location = current_location
+      yield
+      sleep 1
+      return if last_location == current_location
+      
+      tries = 0
+      TIMEOUT.times do |tries|
+        if "complete" == eval_js("DOCUMENT.readyState")
+          handle_client_redirect
+          break
+        else
+          sleep 1
+        end
+      end
+      raise "Unable to load page withing #{TIMEOUT} seconds" if tries == TIMEOUT-1
+    end
 
-    def execute_and_wait(script, element = nil)      
-      execute(%|
-#{script}
-delay 2
-repeat with i from 1 to #{TIMEOUT}
-  #{js.wrap("document.readyState")}
-  if (response) is "complete" then
-    exit repeat
-  else
-    delay 1
-  end if
-end repeat|, element)
+    def handle_client_redirect
+      no_redirect_flag = "proceed"
+      redirect = eval_js(
+%|var elements = DOCUMENT.getElementsByTagName('META');
+for (var i = 0; i < elements.length; i++) {
+	if ("refresh" == elements[i].httpEquiv && elements[i].content != undefined && elements[i].content.indexOf(";") != "-1") {
+	  return elements[i].content;
+	}
+}
+return "#{no_redirect_flag}"|)
+      if redirect != no_redirect_flag
+        time_til_redirect = redirect.split(";").first.to_i
+        sleep time_til_redirect
+      end
+    end
+    
+    def eval_js(script)
+      @app.do_JavaScript(js.wrap(script), :in => @document)      
     end
   end # class AppleScripter
 end

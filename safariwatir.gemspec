@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
 	s.name = %q{safariwatir}
 	s.version = "0.1.2"
 	s.rubyforge_project = 'safariwatir'
-	s.date = %q{2006-07-23}
+	s.date = %q{2006-10-12}
 	s.summary = %q{Automated testing tool for web applications.}
 	s.description = %q{WATIR stands for "Web Application Testing in Ruby".  See WATIR project for more information.  This is simply a Safari-version of the original IE-only WATIR.}
 	s.email = %q{dave.hoover@gmail.com}
