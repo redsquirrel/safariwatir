@@ -72,7 +72,7 @@ def safari.colbert
   goto("http://www.colbertnation.com/cn/contact.php")
   text_field(:name, "formmessage").set("Beware the Bear")
   button(:value, "Send Email").click
-  puts "FAILURE colbert" unless text_field(:name, "formmessage").verify_contains("Enter message")  
+  puts "FAILURE colbert" unless text_field(:name, "formmessage").verify_contains(/Enter message/)  
 end
 
 def safari.redsquirrel

@@ -290,7 +290,12 @@ module Watir
       
       def verify_contains(expected)
         actual = getContents
-        expected == actual
+        case expected
+        when Regexp
+          actual.match(expected) != nil
+        else
+          expected == actual
+        end
       end
     end
 
