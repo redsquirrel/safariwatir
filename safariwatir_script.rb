@@ -25,8 +25,8 @@ def safari.google_to_prag
   link(:url, "http://www.pragmaticprogrammer.com/titles/ruby/code/index.html").click
   link(:text, "Catalog").click
   # site was down
-  # link(:text, "All Books").click
-  goto("http://pragmaticprogrammer.com/bookshelf/") # workaround
+  link(:text, "All Books").click
+  # goto("http://pragmaticprogrammer.com/bookshelf/") # workaround
   link(:text, /Agile Retrospectives/).click
   puts "FAILURE prag" unless contains_text("Dave Hoover")  
 end
@@ -119,14 +119,16 @@ def safari.tables
   puts "FAILURE dreamweaver" unless table(:id, "titletable")[1][1].text =~ /CSS/
 end
 
-safari.google_to_prag
-safari.ala
-safari.amazon
-safari.google_advanced
-safari.reddit
-safari.colbert
-safari.redsquirrel
-safari.weinberg
-safari.tables
-
-safari.close
+begin
+  safari.google_to_prag
+  safari.ala
+  safari.amazon
+  safari.google_advanced
+  safari.reddit
+  safari.colbert
+  safari.redsquirrel
+  safari.weinberg
+  safari.tables
+ensure
+  safari.close
+end
