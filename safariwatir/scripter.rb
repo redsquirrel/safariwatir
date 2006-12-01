@@ -125,6 +125,10 @@ if (element == undefined) {
     def document_text
       execute(%|document.getElementsByTagName('BODY').item(0).innerText;|)
     end
+
+    def document_html
+      execute(%|document.getElementsByTagName('BODY').item(0).outerHTML;|)
+    end
       
     def highlight(element, &block)
       execute(element.operate do
