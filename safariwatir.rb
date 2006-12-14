@@ -94,6 +94,7 @@ module Watir
       def operate_by_value(&block)
         @scripter.operate_by_input_value(self, &block)
       end
+      alias_method :operate_by_caption, :operate_by_value
     end
 
     class Form < HtmlElement
@@ -276,12 +277,14 @@ module Watir
 
     class TextField < InputElement
       def set(value)
+        @scripter.focus(self)
         @scripter.highlight(self) do
           clear_text_input
           value.length.times do |i|
             append_text_input(value[i, 1])
           end
         end
+        @scripter.blur(self)
       end
       
       def getContents
@@ -385,6 +388,8 @@ module Watir
     include Container
     include PageContainer
 
+    DEFAULT_TYPING_LAG = 0.08
+
     def self.start(url = nil)
       safari = new
       safari.goto(url) if url
@@ -394,7 +399,25 @@ module Watir
     def initialize
       @scripter = AppleScripter.new
       @scripter.ensure_window_ready
+      set_slow_speed
     end
+
+    def set_fast_speed
+      @scripter.typing_lag = 0
+    end
+    
+    def set_slow_speed
+      @scripter.typing_lag = DEFAULT_TYPING_LAG
+    end
+    
+    def speed=(how_fast)
+      case how_fast
+      when :fast : set_fast_speed
+      when :slow : set_slow_speed
+      else
+        raise ArgumentError, "Invalid speed: #{how_fast}"
+      end
+    end    
     
     def close
       scripter.close

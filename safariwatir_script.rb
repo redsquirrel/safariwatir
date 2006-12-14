@@ -2,11 +2,13 @@ require 'rubygems'
 require 'safariwatir'
 
 # TODO 
-# Be more attached to the Safari window. Currently, if a different window is selected, the AppleScript executes against it.
+# Be more attached to the Safari window.
+#    Currently, if a different window is selected, the AppleScript executes against it.
 # Verify onclick is working for buttons and links
 # TextFields should not respond to button method, etc.
 
-# Unsupported Elements: Test that P/Div/Span/TD handle link, button, etc., Javascript confirm [OK/CANCEL], Javascript prompt, Javascript popup windows
+# Unsupported Elements: Test that P/Div/Span/TD handle link, button, etc.,
+#                       Javascript confirm [OK/CANCEL], Javascript prompt, Javascript popup windows
 
 # Need to find a better way to distinguish between a submit button and a checkbox, re: page_load
 
@@ -24,9 +26,7 @@ def safari.google_to_prag
   link(:text, "Programming Ruby, 2nd Ed.").click
   link(:url, "http://www.pragmaticprogrammer.com/titles/ruby/code/index.html").click
   link(:text, "Catalog").click
-  # site was down
   link(:text, "All Books").click
-  # goto("http://pragmaticprogrammer.com/bookshelf/") # workaround
   link(:text, /Agile Retrospectives/).click
   puts "FAILURE prag" unless contains_text("Dave Hoover")  
 end

@@ -76,10 +76,11 @@ if (element) {
     include Watir::Exception
     
     attr_reader :js
+    attr_accessor :typing_lag
     private :js
     
     TIMEOUT = 10
-  
+
     def initialize(scripter = JavaScripter.new)
       @js = scripter
       @app = AS.app("Safari")
@@ -129,11 +130,18 @@ if (element == undefined) {
     def document_html
       execute(%|document.getElementsByTagName('BODY').item(0).outerHTML;|)
     end
+  
+    def focus(element)
+      execute(element.operate { %|element.focus();| }, element)
+    end
+
+    def blur(element)
+      execute(element.operate { %|element.blur();| }, element)
+    end
       
     def highlight(element, &block)
       execute(element.operate do
-%|element.focus();        
-element.originalColor = element.style.backgroundColor;
+%|element.originalColor = element.style.backgroundColor;
 element.style.backgroundColor = 'yellow';|
       end, element)      
 
@@ -181,6 +189,7 @@ if (!option_found) {
     end
       
     def append_text_input(value, element = @element)
+      sleep typing_lag
       execute(element.operate do 
 %|element.value += '#{value}';
 element.setSelectionRange(element.value.length, element.value.length);| 
@@ -423,22 +432,22 @@ SCRIPT`
       nil
     end
     
-    def page_load
+    def page_load      
       last_location = current_location
       yield
       sleep 1
-      return if last_location == current_location
       
       tries = 0
       TIMEOUT.times do |tries|
         if "complete" == eval_js("DOCUMENT.readyState")
+          sleep 0.4          
           handle_client_redirect
           break
         else
           sleep 1
         end
       end
-      raise "Unable to load page withing #{TIMEOUT} seconds" if tries == TIMEOUT-1
+      raise "Unable to load page within #{TIMEOUT} seconds" if tries == TIMEOUT-1
     end
 
     def handle_client_redirect
