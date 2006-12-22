@@ -162,7 +162,25 @@ element.style.backgroundColor = 'yellow';|
 
     def select_option(element = @element)
       execute(element.operate do
-        handle_option(element, %|element.options[i].selected = true;|)
+%|var selected = -1;
+var previous_selection = 0;
+for (var i = 0; i < element.options.length; i++) {
+  if (element.options[i].selected) {
+    previous_selection = i;
+  }
+  if (element.options[i].#{element.how} == '#{element.what}') {
+    element.options[i].selected = true;
+    selected = i;
+  }
+}
+if (selected == -1) {
+  return '#{ELEMENT_NOT_FOUND}';
+} else if (previous_selection != selected) {        
+  var event = document.createEvent('HTMLEvents');
+  event.initEvent('change', true, true);  
+  element.options[selected].dispatchEvent(event);
+}
+|
       end, element)
     end
     

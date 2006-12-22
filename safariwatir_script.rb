@@ -57,7 +57,7 @@ def safari.google_advanced
   radio(:id, "ss").set
   text_field(:name, "as_q").set("obtiva")
   button(:name, "btnG").click
-  puts "FAILURE google" unless contains_text("RailsConf Facebook")
+  puts "FAILURE google" unless contains_text("Training, Coaching, and Software Development")
 end
 
 def safari.reddit
@@ -100,8 +100,9 @@ def safari.weinberg
 end
 
 def safari.tables
-  goto("http://basecamphq.com/")
-  puts "FAILURE basecamp content" unless table(:index, 1)[1][2].text =~ /What is Basecamp\?/
+  # Site Redesign, need to update test
+  # goto("http://basecamphq.com/")
+  # puts "FAILURE basecamp content" unless table(:index, 1)[1][2].text =~ /What is Basecamp\?/
   
   goto("http://www.jimthatcher.com/webcourse9.htm")
   puts "FAILURE thatcher" unless cell(:id, "c5").text == "subtotals"
@@ -119,6 +120,13 @@ def safari.tables
   puts "FAILURE dreamweaver" unless table(:id, "titletable")[1][1].text =~ /CSS/
 end
 
+def safari.onchange
+  goto("http://www.gr8cardeal.co.uk/?s=1")
+  select_list(:name, "manufacturer").select_value("BMW")
+  sleep 0.3 # There's an Ajax call here
+  select_list(:name, "model").select_value("Z4 ROADSTER")
+end
+
 begin
   safari.google_to_prag
   safari.ala
@@ -129,6 +137,7 @@ begin
   safari.redsquirrel
   safari.weinberg
   safari.tables
+  safari.onchange
 ensure
   safari.close
 end
