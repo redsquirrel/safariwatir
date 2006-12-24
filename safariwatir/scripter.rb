@@ -8,9 +8,18 @@ module Watir
   NO_RESPONSE = "__safari_watir_no_response__"
   TABLE_CELL_NOT_FOUND = "__safari_watir_cell_unfound__"
 
+  JS_LIBRARY = %|
+function dispatchOnChange(element) {
+  var event = document.createEvent('HTMLEvents');
+  event.initEvent('change', true, true);  
+  element.dispatchEvent(event);
+}
+|
+
   class JavaScripter    
     def operate(locator, operation)
-%|#{locator}
+%|#{JS_LIBRARY}
+#{locator}
 if (element) {
   #{operation}
 } else {
@@ -176,9 +185,7 @@ for (var i = 0; i < element.options.length; i++) {
 if (selected == -1) {
   return '#{ELEMENT_NOT_FOUND}';
 } else if (previous_selection != selected) {        
-  var event = document.createEvent('HTMLEvents');
-  event.initEvent('change', true, true);  
-  element.options[selected].dispatchEvent(event);
+  dispatchOnChange(element.options[selected]);
 }
 |
       end, element)
@@ -210,6 +217,7 @@ if (!option_found) {
       sleep typing_lag
       execute(element.operate do 
 %|element.value += '#{value}';
+dispatchOnChange(element);
 element.setSelectionRange(element.value.length, element.value.length);| 
       end, element)
     end

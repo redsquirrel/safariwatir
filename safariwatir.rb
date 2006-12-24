@@ -235,6 +235,8 @@ module Watir
       def column_count
         # TODO
       end
+
+      def tag; "TABLE"; end
     end
     
     class TableRow
@@ -258,6 +260,8 @@ module Watir
       def column_count
         # TODO
       end
+
+      def tag; "TR"; end
     end
     
     class TableCell < ContentElement
@@ -273,6 +277,8 @@ module Watir
       def operate(&block)
         @scripter.operate_by_table_cell(self, &block)
       end
+
+      def tag; "TD"; end
     end
 
     class TextField < InputElement
