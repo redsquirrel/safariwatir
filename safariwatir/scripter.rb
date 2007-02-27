@@ -92,7 +92,7 @@ if (element) {
 
     def initialize(scripter = JavaScripter.new)
       @js = scripter
-      @app = AS.app("Safari")
+      @app = Appscript.app("Safari")
       @document = @app.documents[1]
     end
               
