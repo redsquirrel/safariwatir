@@ -42,10 +42,10 @@ end
 def safari.amazon
   goto("http://amazon.com")
   select_list(:name, "url").select("VHS")
-  select_list(:name, "url").select_value("search-alias=software")
-  text_field(:name, "field-keywords").set("Orion")
-  image(:name, "Go").click
-  puts "FAILURE amazon" unless contains_text("Master of Orion")
+  select_list(:name, "url").select_value("search-alias=stripbooks")
+  text_field(:name, "field-keywords").set("potter")
+  button(:name, "Go").click
+  puts "FAILURE amazon" unless contains_text("Deathly Hallows")
 end
 
 def safari.google_advanced
@@ -127,6 +127,12 @@ def safari.onchange
   select_list(:name, "model").select_value("Z4 ROADSTER")
 end
 
+def safari.ruby_sponsor_images
+  goto("http://mtnwestruby.org/")
+  puts "FAILURE image obtiva" unless image(:src, "http://mtnwestruby.org/images/sponsors/obtiva_logo.png").exists?
+  puts "FAILURE image thoughtworks" unless image(:src, /thoughtworks/).exists?
+end
+
 begin
   safari.google_to_prag
   safari.ala
@@ -138,6 +144,7 @@ begin
   safari.weinberg
   safari.tables
   safari.onchange
+  safari.ruby_sponsor_images
 ensure
   safari.close
 end

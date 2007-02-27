@@ -301,8 +301,8 @@ for (var i = 0; i < document.links.length; i++) {
     end
     private :find_link
 
-    def handle_match(element)
-      how = {:text => "text", :url => "href"}[element.how]
+    def handle_match(element, how = nil)
+      how = {:text => "text", :url => "href"}[element.how] unless how
       case element.what
         when Regexp:
           %|#{how}.match(/#{element.what.source}/#{element.what.casefold? ? "i":nil})|          
@@ -357,11 +357,11 @@ for (var i = 0; i < elements.length; i++) {
       js.operate(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what-1}];|, yield)
     end
 
-    def operate_on_label(element)
-      js.operate(%|var elements = document.getElementsByTagName('LABEL');
+    def operate_by(element, attribute)
+      js.operate(%|var elements = document.getElementsByTagName('#{element.tag}');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
-  if (elements[i].innerText == '#{element.what}') {
+  if (elements[i].#{handle_match(element, attribute)}) {
     element = elements[i];
     break;
   }

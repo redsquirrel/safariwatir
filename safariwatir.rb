@@ -133,9 +133,19 @@ module Watir
       end      
     end
     
-    class Button < InputElement
+    class Image < HtmlElement
+      def tag; "IMG"; end
+      
+      protected
+      
+      def operate_by_src(&block)
+        @scripter.operate_by(self, 'src', &block)
+      end
     end
     
+    class Button < InputElement
+    end
+        
     class Checkbox < InputElement
       def_init :scripter, :how, :what, :value
       def by_value
@@ -154,7 +164,7 @@ module Watir
       protected
       
       def operate_by_text(&block)
-        @scripter.operate_on_label(self, &block)
+        @scripter.operate_by(self, 'innerText', &block)
       end
     end
 
@@ -339,7 +349,7 @@ module Watir
     end
     
     def image(how, what)
-      Button.new(scripter, how, what)
+      Image.new(scripter, how, what)
     end
 
     def label(how, what)
