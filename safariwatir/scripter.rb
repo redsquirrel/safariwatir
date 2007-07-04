@@ -13,13 +13,11 @@ function dispatchOnChange(element) {
   var event = document.createEvent('HTMLEvents');
   event.initEvent('change', true, true);  
   element.dispatchEvent(event);
-}
-|
+}|
 
   class JavaScripter    
     def operate(locator, operation)
-%|#{JS_LIBRARY}
-#{locator}
+%|#{locator}
 if (element) {
   #{operation}
 } else {
@@ -31,7 +29,13 @@ if (element) {
       # Needed because createEvent must be called on a document, and the JavaScripter sub-classes
       # do some transformations to lower-case "document" before we get here at runtime.
       script.gsub! "DOCUMENT", "document"
-      script
+      
+# Needed because I would like to blindly use return statements, but Safari 3 enforces
+# the ECMAScript standard that return statements are only valid within functions.
+%|#{JS_LIBRARY}
+(function() {
+  #{script}
+})()|
     end
     
     def find_cell(cell)
@@ -112,10 +116,6 @@ if (element) {
       end
     end
 
-    def current_location
-      eval_js("window.location.href")
-    end
-
     def get_text_for(element = @element)
       execute(element.operate { %|return element.innerText| }, element)
     end
@@ -133,11 +133,11 @@ if (element == undefined) {
     end
       
     def document_text
-      execute(%|document.getElementsByTagName('BODY').item(0).innerText;|)
+      execute(%|return document.getElementsByTagName('BODY').item(0).innerText;|)
     end
 
     def document_html
-      execute(%|document.getElementsByTagName('BODY').item(0).outerHTML;|)
+      execute(%|return document.getElementsByTagName('BODY').item(0).outerHTML;|)
     end
   
     def focus(element)
@@ -165,7 +165,7 @@ element.style.backgroundColor = 'yellow';|
       block ||= Proc.new {}
       execute(element.operate(&block), element)
       return true
-      rescue UnknownObjectException
+    rescue UnknownObjectException
       return false
     end
 
@@ -185,6 +185,7 @@ for (var i = 0; i < element.options.length; i++) {
 if (selected == -1) {
   return '#{ELEMENT_NOT_FOUND}';
 } else if (previous_selection != selected) {        
+  element.selectedIndex = selected;
   dispatchOnChange(element.options[selected]);
 }
 |
@@ -459,13 +460,12 @@ SCRIPT`
     end
     
     def page_load      
-      last_location = current_location
       yield
       sleep 1
       
       tries = 0
-      TIMEOUT.times do |tries|
-        if "complete" == eval_js("DOCUMENT.readyState")
+      TIMEOUT.times do |tries|        
+        if "complete" == eval_js("return DOCUMENT.readyState") && !@document.URL.get.blank?
           sleep 0.4          
           handle_client_redirect
           break

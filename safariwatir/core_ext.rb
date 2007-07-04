@@ -17,3 +17,15 @@ class String
     gsub(/"/, '\"')
   end
 end
+
+class Object
+  def blank?
+    if respond_to?(:strip)
+      strip.empty?
+    elsif respond_to?(:empty?)
+      empty?
+    else
+      !self
+    end
+  end
+end

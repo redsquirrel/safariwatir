@@ -293,6 +293,7 @@ module Watir
 
     class TextField < InputElement
       def set(value)
+        value = value.to_s
         @scripter.focus(self)
         @scripter.highlight(self) do
           clear_text_input
