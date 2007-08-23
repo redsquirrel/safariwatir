@@ -338,6 +338,7 @@ for (var i = 0; i < elements.length; i++) {
 }|, yield)
     end
     
+    # Checkboxes/Radios have the same name, different values    
     def handle_form_element_name_match(element)
       element_capture = %|element = elements[i];break;|
       if element.by_value
