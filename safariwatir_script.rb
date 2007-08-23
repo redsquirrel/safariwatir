@@ -2,6 +2,9 @@ require 'rubygems'
 require 'safariwatir'
 
 # TODO 
+#
+# Looking up textareas, or any input element for that matter, by index
+#
 # Be more attached to the Safari window.
 #    Currently, if a different window is selected, the AppleScript executes against it.
 # Verify onclick is working for buttons and links
