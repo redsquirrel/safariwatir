@@ -315,6 +315,11 @@ for (var i = 0; i < document.links.length; i++) {
     end
     private :handle_match
   
+    # Contributed by Kyle Campos
+    def checkbox_is_checked?(element = @element)
+      execute(element.operate { %|return element.checked;| }, element)
+    end
+  
     def operate_by_input_value(element)
       js.operate(%|
 var elements = document.getElementsByTagName('INPUT');

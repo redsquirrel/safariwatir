@@ -148,10 +148,21 @@ module Watir
         
     class Checkbox < InputElement
       def_init :scripter, :how, :what, :value
+      
       def by_value
         @value
       end
-      alias :set :click
+
+      # Contributed by Kyle Campos
+      def checked?
+        @scripter.checkbox_is_checked?(self)
+      end
+      
+      def set(check_it = true)
+        return if check_it && checked?
+        return if !check_it && !checked?
+        click
+      end
     end
 
     class Div < ContentElement
