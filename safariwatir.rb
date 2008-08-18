@@ -13,11 +13,34 @@ module Watir
     def text
       @scripter.document_text
     end
+
+    def title
+      @scripter.document_title
+    end
   end
 
   module Container
     attr_reader :scripter
     private :scripter
+
+    DEFAULT_TYPING_LAG = 0.08
+
+    def set_fast_speed
+      @scripter.typing_lag = 0
+    end
+    
+    def set_slow_speed
+      @scripter.typing_lag = DEFAULT_TYPING_LAG
+    end
+    
+    def speed=(how_fast)
+      case how_fast
+      when :fast : set_fast_speed
+      when :slow : set_slow_speed
+      else
+        raise ArgumentError, "Invalid speed: #{how_fast}"
+      end
+    end
 
     module Clickable
       def click
@@ -71,30 +94,23 @@ module Watir
       end
 
       def operate(&block)
-        send("operate_by_" + how.to_s, &block)
+        scripter_suffix = OPERATIONS[how]
+        if scripter_suffix.nil?
+          raise "SafariWatir does not currently support finding by #{how}"
+        end
+        @scripter.send("operate_by_#{scripter_suffix}", self, &block)        
       end
 
-      protected
-      
-      def operate_by_id(&block)
-        @scripter.operate_by_id(self, &block)        
-      end
-      def operate_by_index(&block)
-        @scripter.operate_by_index(self, &block)        
-      end
-      def operate_by_name(&block)
-        @scripter.operate_by_name(self, &block)        
-      end
-      def operate_by_text(&block)
-        @scripter.operate_on_link(self, &block)        
-      end
-      def operate_by_url(&block)
-        @scripter.operate_on_link(self, &block)        
-      end
-      def operate_by_value(&block)
-        @scripter.operate_by_input_value(self, &block)
-      end
-      alias_method :operate_by_caption, :operate_by_value
+      OPERATIONS = {
+        :id => "id",
+        :index => "index",
+        :class => "class",
+        :name => "name",
+        :text => "on_link",
+        :url => "on_link",
+        :value => "input_value",
+        :caption => "input_value"
+      }
     end
 
     class Form < HtmlElement
@@ -123,6 +139,10 @@ module Watir
     class ContentElement < HtmlElement
       include Clickable
       include Container
+
+      def html
+        @scripter.get_html_for(self)
+      end
 
       def text
         @scripter.get_text_for(self)
@@ -205,6 +225,22 @@ module Watir
         Option.new(@scripter, self, how, what)
       end
       
+      def selected_values
+        values = []
+        index = 1
+        loop do
+          option = option(:index, index)
+          break unless option.exists?
+          values << option if option.selected?
+          index += 1
+        end
+        values.map {|o| o.text } #TODO?
+      end
+
+      def selected_value
+        selected_values.first
+      end
+      
       def speak
         @scripter.speak_options_for(self)
       end
@@ -230,6 +266,14 @@ module Watir
       end
       alias :exist? :exists?
       
+      def selected?
+        @scripter.option_selected?(self)
+      end
+      
+      def text
+        @scripter.get_text_for(self)
+      end
+
       def tag; "OPTION"; end
     end
 
@@ -288,6 +332,8 @@ module Watir
     class TableCell < ContentElement
       def initialize(scripter, how, what, row = nil)
         @scripter = scripter.for_table(self)
+        set_slow_speed # TODO: Need to inherit this somehow
+
         @how = how
         @what = what
         @row = row
@@ -416,8 +462,6 @@ module Watir
     include Container
     include PageContainer
 
-    DEFAULT_TYPING_LAG = 0.08
-
     def self.start(url = nil)
       safari = new
       safari.goto(url) if url
@@ -429,23 +473,6 @@ module Watir
       @scripter.ensure_window_ready
       set_slow_speed
     end
-
-    def set_fast_speed
-      @scripter.typing_lag = 0
-    end
-    
-    def set_slow_speed
-      @scripter.typing_lag = DEFAULT_TYPING_LAG
-    end
-    
-    def speed=(how_fast)
-      case how_fast
-      when :fast : set_fast_speed
-      when :slow : set_slow_speed
-      else
-        raise ArgumentError, "Invalid speed: #{how_fast}"
-      end
-    end    
     
     def close
       scripter.close

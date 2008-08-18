@@ -120,6 +120,10 @@ if (element) {
       execute(element.operate { %|return element.innerText| }, element)
     end
 
+    def get_html_for(element = @element)
+      execute(element.operate { %|return element.innerHTML| }, element)
+    end
+
     def operate_by_table_cell(element = @element)      
 %|var element = document;
 if (element == undefined) {
@@ -137,7 +141,11 @@ if (element == undefined) {
     end
 
     def document_html
-      execute(%|return document.getElementsByTagName('BODY').item(0).outerHTML;|)
+      execute(%|return document.all[0].outerHTML;|)
+    end
+
+    def document_title
+      execute(%|return document.title;|)
     end
   
     def focus(element)
@@ -196,17 +204,31 @@ if (selected == -1) {
       element_exists?(element) { handle_option(element) }
     end
     
-    def handle_option(select_list, selection = nil)
+    def handle_option(select_list)
 %|var option_found = false;
 for (var i = 0; i < element.options.length; i++) {
   if (element.options[i].#{select_list.how} == '#{select_list.what}') {
-    #{selection}
     option_found = true;
   }
 }
 if (!option_found) {
   return '#{ELEMENT_NOT_FOUND}';
 }|      
+    end
+    private :handle_option
+
+    def option_selected?(element = @element)
+      element_exists?(element) { handle_selected(element) == "true" }
+    end
+
+    def handle_selected(select_list)
+%|var selected = false;
+for (var i = 0; i < element.options.length; i++) {
+  if (element.options[i].#{select_list.how} == '#{select_list.what}' && element.options[i].selected) {
+    selected = true;
+  }
+}
+return selected;|      
     end
     private :handle_option
     
@@ -341,6 +363,12 @@ for (var i = 0; i < elements.length; i++) {
     #{handle_form_element_name_match(element)}
   }
 }|, yield)
+    end
+
+    def operate_by_class(element)
+      js.operate(%|
+var elements = document.getElementsByClassName('#{element.what}');
+var element = elements[0];|, yield)
     end
     
     # Checkboxes/Radios have the same name, different values    
