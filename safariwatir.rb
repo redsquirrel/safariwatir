@@ -98,18 +98,18 @@ module Watir
         if scripter_suffix.nil?
           raise "SafariWatir does not currently support finding by #{how}"
         end
-        @scripter.send("operate_by_#{scripter_suffix}", self, &block)        
+        @scripter.send("operate_#{scripter_suffix}", self, &block)        
       end
 
       OPERATIONS = {
-        :id => "id",
-        :index => "index",
-        :class => "class",
-        :name => "name",
+        :id => "by_id",
+        :index => "by_index",
+        :class => "by_class",
+        :name => "by_name",
         :text => "on_link",
         :url => "on_link",
-        :value => "input_value",
-        :caption => "input_value"
+        :value => "by_input_value",
+        :caption => "by_input_value"
       }
     end
 

@@ -26,11 +26,11 @@ def safari.google_to_prag
   goto("http://google.com")
   text_field(:name, "q").set("pickaxe")
   button(:name, "btnG").click
-  link(:text, "Programming Ruby, 2nd Ed.").click
-  link(:url, "http://www.pragmaticprogrammer.com/titles/ruby/code/index.html").click
-  link(:text, "Catalog").click
-  link(:text, "All Books").click
-  link(:text, /Agile Retrospectives/).click
+  link(:text, /Programming Ruby/).click
+  link(:url, "http://www.pragprog.com/titles/ruby/source_code").click
+  link(:text, "All Categories").click
+  link(:text, "All Titles").click
+  link(:url, /retrospectives/).click
   puts "FAILURE prag" unless contains_text("Dave Hoover")  
 end
 
@@ -148,6 +148,4 @@ begin
   safari.tables
   safari.onchange
   safari.ruby_sponsor_images
-ensure
-  safari.close
 end
