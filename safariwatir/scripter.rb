@@ -359,7 +359,7 @@ for (var i = 0; i < elements.length; i++) {
 var elements = document.getElementsByName('#{element.what}');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
-  if (elements[i].tagName != 'META') {
+  if (elements[i].tagName != 'META' && elements[i].tagName == '#{element.tag}') {
     #{handle_form_element_name_match(element)}
   }
 }|, yield)
