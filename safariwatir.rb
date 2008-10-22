@@ -54,7 +54,19 @@ module Watir
       def_init :scripter
       
       def click
-        @scripter.click_alert_ok
+        @scripter.click_alert
+      end
+    end
+
+    class SecurityWarningWindow
+      def_init :scripter
+      
+      def continue
+        @scripter.click_security_warning("Continue")
+      end
+      
+      def cancel
+        @scripter.click_security_warning("Cancel")        
       end
     end
 
@@ -484,6 +496,10 @@ module Watir
 
     def alert
       AlertWindow.new(scripter)
+    end
+
+    def security_warning
+      SecurityWarningWindow.new(scripter)
     end
     
     def goto(url)

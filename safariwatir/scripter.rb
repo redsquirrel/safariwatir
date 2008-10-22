@@ -409,7 +409,7 @@ for (var i = 0; i < elements.length; i++) {
       end
     end
 
-    def click_alert_ok
+    def click_alert
       execute_system_events(%|
 tell window 1
 	if button named "OK" exists then
@@ -417,6 +417,19 @@ tell window 1
 	end if
 end tell|)
     end 
+    
+    def click_security_warning(label)
+      execute_system_events(%|
+tell window 1
+	tell sheet 1
+		tell group 2
+			if button named "#{label}" exists then
+				click button named "#{label}"
+			end if
+		end tell
+	end tell
+end tell|)
+    end
 
     def for_table(element)
       AppleScripter.new(TableJavaScripter.new(element))
