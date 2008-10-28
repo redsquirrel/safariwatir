@@ -247,19 +247,21 @@ element.setSelectionRange(element.value.length, element.value.length);|
 
     def click_element(element = @element)
       page_load do
+# Not sure if these events should be either/or. But if you have an image with an onclick, it fires twice without the else clause.
         execute(element.operate { %|
 if (element.click) {
   element.click();
 } else {
-  var event = DOCUMENT.createEvent('MouseEvents');
-  event.initEvent('click', true, true);
-  element.dispatchEvent(event);
-
   if (element.onclick) {
     var event = DOCUMENT.createEvent('HTMLEvents');
     event.initEvent('click', true, true);
     element.onclick(event);
+  } else {
+    var event = DOCUMENT.createEvent('MouseEvents');
+    event.initEvent('click', true, true);
+    element.dispatchEvent(event);    
   }
+
 }| })
       end
     end
@@ -390,6 +392,14 @@ var element = elements[0];|, yield)
 
     def operate_by_index(element)
       js.operate(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what-1}];|, yield)
+    end
+
+    def operate_by_src(element, &block)
+      operate_by(element, 'src', &block)
+    end
+
+    def operate_by_text(element, &block)
+      operate_by(element, 'innerText', &block)
     end
 
     def operate_by(element, attribute)

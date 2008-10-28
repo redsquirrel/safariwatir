@@ -107,6 +107,9 @@ module Watir
 
       def operate(&block)
         scripter_suffix = OPERATIONS[how]
+        if scripter_suffix.kind_of? Hash
+          scripter_suffix = scripter_suffix[name]
+        end
         if scripter_suffix.nil?
           raise "SafariWatir does not currently support finding by #{how}"
         end
@@ -118,10 +121,11 @@ module Watir
         :index => "by_index",
         :class => "by_class",
         :name => "by_name",
-        :text => "on_link",
+        :text => { "Link" => "on_link", "Label" => "by_text" },
         :url => "on_link",
         :value => "by_input_value",
-        :caption => "by_input_value"
+        :caption => "by_input_value",
+        :src => "by_src",
       }
     end
 
@@ -166,13 +170,9 @@ module Watir
     end
     
     class Image < HtmlElement
+      include Clickable
+      
       def tag; "IMG"; end
-      
-      protected
-      
-      def operate_by_src(&block)
-        @scripter.operate_by(self, 'src', &block)
-      end
     end
     
     class Button < InputElement
@@ -203,12 +203,6 @@ module Watir
 
     class Label < ContentElement
       def tag; "LABEL"; end
-      
-      protected
-      
-      def operate_by_text(&block)
-        @scripter.operate_by(self, 'innerText', &block)
-      end
     end
 
     class Link < ContentElement
