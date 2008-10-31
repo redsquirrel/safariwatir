@@ -59,14 +59,28 @@ module Watir
     end
 
     class SecurityWarningWindow
-      def_init :scripter
+      def initialize(scripter, url)
+        @scripter = scripter
+        @url = url
+      end
       
       def continue
-        @scripter.click_security_warning("Continue")
+        handle_click("Continue")
       end
       
       def cancel
-        @scripter.click_security_warning("Cancel")        
+        handle_click("Cancel")
+      end
+      
+    private
+      def handle_click(button)
+        if @url
+          @scripter.navigate_to(@url) do
+            @scripter.click_security_warning(button)
+          end
+        else
+          @scripter.click_security_warning(button)
+        end
       end
     end
 
@@ -494,6 +508,10 @@ module Watir
 
     def security_warning
       SecurityWarningWindow.new(scripter)
+    end
+
+    def security_warning_at(url)
+      SecurityWarningWindow.new(scripter, url)
     end
     
     def goto(url)

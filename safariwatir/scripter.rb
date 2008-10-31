@@ -7,7 +7,8 @@ module Watir
   FRAME_NOT_FOUND = "__safari_watir_frame_unfound__"
   NO_RESPONSE = "__safari_watir_no_response__"
   TABLE_CELL_NOT_FOUND = "__safari_watir_cell_unfound__"
-
+  EXTRA_ACTION_SUCCESS = "__safari_watir_extra_action__"
+  
   JS_LIBRARY = %|
 function dispatchOnChange(element) {
   var event = document.createEvent('HTMLEvents');
@@ -110,8 +111,8 @@ if (element) {
       @app.quit
     end
   
-    def navigate_to(url)
-      page_load do
+    def navigate_to(url, &extra_action)
+      page_load(extra_action) do
         @document.URL.set(url)
       end
     end
@@ -435,10 +436,11 @@ tell window 1
 		tell group 2
 			if button named "#{label}" exists then
 				click button named "#{label}"
+				return "#{EXTRA_ACTION_SUCCESS}"
 			end if
 		end tell
 	end tell
-end tell|)
+end tell|, true)
     end
 
     def for_table(element)
@@ -507,16 +509,19 @@ SCRIPT`
     end
 
     # Must have "Enable access for assistive devices" checked in System Preferences > Universal Access
-    def execute_system_events(script)      
-`osascript <<SCRIPT
+    def execute_system_events(script, capture_result = false)
+result = `osascript <<SCRIPT
 tell application "System Events" to tell process "Safari"  
 	#{script}
 end tell
 SCRIPT`
-      nil
+      
+      if capture_result && result
+        return result.chomp 
+      end
     end
     
-    def page_load      
+    def page_load(extra_action = nil)      
       yield
       sleep 1
       
@@ -526,6 +531,9 @@ SCRIPT`
           sleep 0.4          
           handle_client_redirect
           break
+        elsif extra_action
+          result = extra_action.call
+          break if result == EXTRA_ACTION_SUCCESS
         else
           sleep 1
         end
