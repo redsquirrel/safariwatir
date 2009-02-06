@@ -11,6 +11,6 @@ Gem::Specification.new do |s|
 	s.require_paths = ['.']
 	s.add_dependency('rb-appscript')
 	s.requirements = ["Mac OS X running Safari", %q{Some features require you to turn on "Enable access for assistive devices" in System Preferences > Universal Access}]
-	s.files = ["safariwatir.rb","safariwatir_script.rb","safariwatir/core_ext.rb","safariwatir/scripter.rb","safariwati/exceptions.rb"]
+	s.files = ["safariwatir.rb","safariwatir_script.rb","safariwatir/core_ext.rb","safariwatir/scripter.rb","safariwatir/exceptions.rb"]
 	s.has_rdoc = true
 end
