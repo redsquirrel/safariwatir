@@ -27,5 +27,5 @@ We are putting Watir on Safari. The original Watir (Web Application Testing in R
 
   git clone git://github.com/redsquirrel/safariwatir.git
   cd safariwatir
-  gem build safariwatir
+  gem build safariwatir.gemspec
   [sudo] gem install safariwatir
