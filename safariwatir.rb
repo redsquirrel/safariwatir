@@ -489,7 +489,7 @@ module Watir
     end
     
     def initialize
-      @scripter = AppleScripter.new
+      @scripter = AppleScripter.new(JavaScripter.new)
       @scripter.ensure_window_ready
       set_slow_speed
     end
@@ -518,4 +518,14 @@ module Watir
       scripter.navigate_to(url)
     end
   end # class Safari
+
+  
+  class WebKit < Safari
+    def initialize
+      @scripter = AppleScripter.new(JavaScripter.new,:appname => "WebKit")
+      @scripter.ensure_window_ready
+      set_slow_speed
+    end
+  end # class WebKit
+    
 end

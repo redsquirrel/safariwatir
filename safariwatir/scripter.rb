@@ -95,9 +95,10 @@ if (element) {
     
     TIMEOUT = 10
 
-    def initialize(scripter = JavaScripter.new)
+    def initialize(scripter = JavaScripter.new, opts={})
       @js = scripter
-      @app = Appscript.app("Safari")
+      appname = opts[:appname] || "Safari"
+      @app = Appscript.app(appname)
       @document = @app.documents[1]
     end
               
