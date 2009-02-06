@@ -10,14 +10,14 @@ We are putting Watir on Safari. The original Watir (Web Application Testing in R
 
 == SYNOPSIS:
 
-require 'rubygems'
-require 'safariwatir'
+  require 'rubygems'
+  require 'safariwatir'
 
-browser = Watir::Safari.new
-browser.goto("http://google.com")
-browser.text_field(:name, "q").set("obtiva")
-browser.button(:name, "btnI").click
-puts "FAILURE" unless browser.contains_text("software")
+  browser = Watir::Safari.new
+  browser.goto("http://google.com")
+  browser.text_field(:name, "q").set("obtiva")
+  browser.button(:name, "btnI").click
+  puts "FAILURE" unless browser.contains_text("software")
 
 == INSTALL:
 
