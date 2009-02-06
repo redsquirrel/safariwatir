@@ -31,3 +31,12 @@ This project aims at adding Watir support for Safari on the Mac.
   cd safariwatir
   gem build safariwatir.gemspec
   [sudo] gem install safariwatir
+
+== RUNNING SAFARIWATIR AGAINST WATIR'S CORE TESTS
+
+  # First, install the SafariWatir gem (see above)
+  svn checkout https://svn.openqa.org/svn/watir/trunk
+  cd watir/watir
+  cp unittests/options.yml.example unittests/options.yml
+  # Edit unittests/options.yml and set browser: safari
+  ruby unittests/core_tests.rb
