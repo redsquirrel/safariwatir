@@ -6,7 +6,9 @@
 
 == DESCRIPTION:
 
-We are putting Watir on Safari. The original Watir (Web Application Testing in Ruby) project supports only IE on Windows. This project aims at adding Watir support for Safari on the Mac.
+We are putting Watir on Safari.
+The original Watir (Web Application Testing in Ruby) project supports only IE on Windows.
+This project aims at adding Watir support for Safari on the Mac.
 
 == SYNOPSIS:
 
