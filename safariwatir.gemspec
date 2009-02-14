@@ -1,16 +1,34 @@
+# -*- encoding: utf-8 -*-
+
 Gem::Specification.new do |s|
-	s.name = %q{safariwatir}
-	s.version = "0.3.2"
-	s.rubyforge_project = 'safariwatir'
-	s.date = %q{2008-10-28}
-	s.summary = %q{Automated testing tool for web applications.}
-	s.description = %q{WATIR stands for "Web Application Testing in Ruby".  See WATIR project for more information.  This is a Safari-version of the original IE-only WATIR.}
-	s.email = %q{dave@obtiva.com}
-	s.homepage = %q{http://safariwatir.rubyforge.org/}
-	s.authors = ["Dave Hoover"]
-	s.require_paths = ['.']
-	s.add_dependency('rb-appscript')
-	s.requirements = ["Mac OS X running Safari", %q{Some features require you to turn on "Enable access for assistive devices" in System Preferences > Universal Access}]
-	s.files = ["safariwatir.rb","safariwatir_script.rb","safariwatir/core_ext.rb","safariwatir/scripter.rb","safariwatir/exceptions.rb"]
-	s.has_rdoc = true
+  s.name = %q{safariwatir}
+  s.version = "0.3.3"
+
+  s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
+  s.authors = ["Dave Hoover"]
+  s.date = %q{2009-02-14}
+  s.description = %q{WATIR stands for "Web Application Testing in Ruby".  See WATIR project for more information.  This is a Safari-version of the original IE-only WATIR.}
+  s.email = %q{dave@obtiva.com}
+  s.extra_rdoc_files = ["lib/safariwatir/core_ext.rb", "lib/safariwatir/scripter.rb", "lib/safariwatir.rb", "lib/watir/exceptions.rb", "README.txt"]
+  s.files = ["lib/safariwatir/core_ext.rb", "lib/safariwatir/scripter.rb", "lib/safariwatir.rb", "lib/watir/exceptions.rb", "Manifest", "Rakefile", "README.txt", "safariwatir.gemspec", "safariwatir_example.rb"]
+  s.has_rdoc = true
+  s.homepage = %q{http://safariwatir.rubyforge.org/}
+  s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Safariwatir", "--main", "README.txt"]
+  s.require_paths = ["lib"]
+  s.rubyforge_project = %q{safariwatir}
+  s.rubygems_version = %q{1.3.1}
+  s.summary = %q{Automated testing tool for web applications.}
+
+  if s.respond_to? :specification_version then
+    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
+    s.specification_version = 2
+
+    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_development_dependency(%q<rb-appscript>, [">= 0"])
+    else
+      s.add_dependency(%q<rb-appscript>, [">= 0"])
+    end
+  else
+    s.add_dependency(%q<rb-appscript>, [">= 0"])
+  end
 end
