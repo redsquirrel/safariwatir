@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/core_ext'
 require File.dirname(__FILE__) + '/../watir/exceptions'
 require 'appscript'
 
-module Watir
+module Watir # :nodoc:
   ELEMENT_NOT_FOUND = "__safari_watir_element_unfound__"
   FRAME_NOT_FOUND = "__safari_watir_frame_unfound__"
   NO_RESPONSE = "__safari_watir_no_response__"
@@ -16,7 +16,7 @@ function dispatchOnChange(element) {
   element.dispatchEvent(event);
 }|
 
-  class JavaScripter    
+  class JavaScripter # :nodoc:
     def operate(locator, operation)
 %|#{locator}
 if (element) {
@@ -64,7 +64,7 @@ if (element) {
     end
   end
 
-  class FrameJavaScripter < JavaScripter
+  class FrameJavaScripter < JavaScripter # :nodoc:
     def initialize(frame)
       @page_container = "parent.#{frame.name}"
     end
@@ -77,7 +77,7 @@ if (element) {
     end
   end
 
-  class TableJavaScripter < JavaScripter
+  class TableJavaScripter < JavaScripter # :nodoc:
     def_init :cell
     
     def wrap(script)
@@ -86,7 +86,7 @@ if (element) {
     end
   end
   
-  class AppleScripter
+  class AppleScripter # :nodoc:
     include Watir::Exception
     
     attr_reader :js
