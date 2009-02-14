@@ -107,7 +107,11 @@ if (element) {
       @app.make(:new => :document) if @app.documents.get.size == 0
       @document = @app.documents[1]
     end
-
+    
+    def url
+        @document.URL.get
+    end
+    
     def close
       @app.quit
     end

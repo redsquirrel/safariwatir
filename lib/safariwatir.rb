@@ -494,6 +494,11 @@ module Watir
       set_slow_speed
     end
     
+    # URL of page
+    def url
+        scripter.url
+    end
+        
     def close
       scripter.close
     end
@@ -501,7 +506,7 @@ module Watir
     def quit
       scripter.quit
     end
-
+    
     def alert
       AlertWindow.new(scripter)
     end
