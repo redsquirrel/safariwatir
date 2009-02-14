@@ -522,6 +522,11 @@ module Watir
     def goto(url)
       scripter.navigate_to(url)
     end
+    
+    # Reloads the page
+    def reload
+      scripter.reload
+    end
   end # class Safari
 
   

@@ -121,6 +121,10 @@ if (element) {
         @document.URL.set(url)
       end
     end
+    
+    def reload
+      execute(%|window.location.reload()|)
+    end
 
     def get_text_for(element = @element)
       execute(element.operate { %|return element.innerText| }, element)
