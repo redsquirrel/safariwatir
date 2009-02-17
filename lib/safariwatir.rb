@@ -527,6 +527,7 @@ module Watir
     def reload
       scripter.reload
     end
+    alias :refresh :reload
   end # class Safari
 
   
