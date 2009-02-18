@@ -496,9 +496,14 @@ module Watir
     
     # URL of page
     def url
-        scripter.url
+      scripter.url
     end
-        
+    
+    # Hide's Safari
+    def hide
+      scripter.hide
+    end
+    
     def close
       scripter.close
     end
@@ -533,7 +538,7 @@ module Watir
   
   class WebKit < Safari
     def initialize
-      @scripter = AppleScripter.new(JavaScripter.new,:appname => "WebKit")
+      @scripter = AppleScripter.new(JavaScripter.new, :appname => "WebKit")
       @scripter.ensure_window_ready
       set_slow_speed
     end
