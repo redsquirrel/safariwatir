@@ -328,6 +328,15 @@ if (element.onclick) {
       end
     end
 
+    def click_link_jquery(element = @element)      
+      click = %/
+$(element).trigger('click');
+/
+      page_load do
+        execute(js.operate(find_link(element), click))
+      end
+    end
+
     def operate_on_link(element)
       js.operate(find_link(element), yield)
     end

@@ -235,6 +235,12 @@ module Watir
         end
       end
 
+      def click_jquery
+        @scripter.highlight(self) do
+          click_link_jquery
+        end
+      end
+
       def tag; "A"; end
     end
 
