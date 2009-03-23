@@ -159,6 +159,10 @@ module Watir
       def speak
         @scripter.speak_value_of(self)
       end
+      
+      def enabled?
+        !@scripter.element_disabled?(self)
+      end
 
       def tag; "INPUT"; end
 
