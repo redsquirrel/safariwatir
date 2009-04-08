@@ -218,6 +218,10 @@ module Watir
     class Div < ContentElement
       def tag; "DIV"; end
     end
+    
+    class P < ContentElement
+      def tag; "P"; end
+    end
 
     class Label < ContentElement
       def tag; "LABEL"; end
@@ -420,6 +424,10 @@ module Watir
 
     def div(how, what)
       Div.new(scripter, how, what)
+    end
+    
+    def p(how, what)
+      P.new(scripter, how, what)
     end
 
     def form(how, what)
