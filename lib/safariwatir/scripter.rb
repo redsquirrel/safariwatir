@@ -97,8 +97,8 @@ if (element) {
 
     def initialize(scripter = JavaScripter.new, opts={})
       @js = scripter
-      appname = opts[:appname] || "Safari"
-      @app = Appscript.app(appname)
+      @appname = opts[:appname] || "Safari"
+      @app = Appscript.app(@appname)
       @document = @app.documents[1]
     end
               
@@ -110,6 +110,18 @@ if (element) {
     
     def url
         @document.URL.get
+    end
+    
+    def hide
+      # because applescript is stupid and annoying you have
+      # to get all the processes from System Events, grab
+      # the right one for this instance and then set visible
+      # of it to false.
+      se = Appscript.app("System Events")
+      safari = se.processes.get.select do |app|
+        app.name.get == @appname
+      end.first
+      safari.visible.set(false)
     end
     
     def close
@@ -352,6 +364,10 @@ for (var i = 0; i < document.links.length; i++) {
     # Contributed by Kyle Campos
     def checkbox_is_checked?(element = @element)
       execute(element.operate { %|return element.checked;| }, element)
+    end
+    
+    def element_disabled?(element = @element)      
+      execute(element.operate { %|return element.disabled;| }, element)
     end
   
     def operate_by_input_value(element)

@@ -160,6 +160,10 @@ module Watir
       def speak
         @scripter.speak_value_of(self)
       end
+      
+      def enabled?
+        !@scripter.element_disabled?(self)
+      end
 
       def tag; "INPUT"; end
 
@@ -214,6 +218,10 @@ module Watir
 
     class Div < ContentElement
       def tag; "DIV"; end
+    end
+    
+    class P < ContentElement
+      def tag; "P"; end
     end
 
     class Label < ContentElement
@@ -418,6 +426,10 @@ module Watir
     def div(how, what)
       Div.new(scripter, how, what)
     end
+    
+    def p(how, what)
+      P.new(scripter, how, what)
+    end
 
     def form(how, what)
       Form.new(scripter, how, what)
@@ -497,9 +509,14 @@ module Watir
     
     # URL of page
     def url
-        scripter.url
+      scripter.url
     end
-        
+    
+    # Hide's Safari
+    def hide
+      scripter.hide
+    end
+    
     def close
       scripter.close
     end
@@ -534,7 +551,7 @@ module Watir
   
   class WebKit < Safari
     def initialize
-      @scripter = AppleScripter.new(JavaScripter.new,:appname => "WebKit")
+      @scripter = AppleScripter.new(JavaScripter.new, :appname => "WebKit")
       @scripter.ensure_window_ready
       set_slow_speed
     end
