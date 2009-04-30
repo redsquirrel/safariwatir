@@ -412,6 +412,13 @@ var element = elements[0];|, yield)
       operate_by(element, 'innerText', &block)
     end
 
+    def operate_by_xpath(element)
+      js.operate(%|
+var result = document.evaluate('#{element.what}', document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+var element = result ? result.singleNodeValue : null;
+|, yield)
+    end
+
     def operate_by(element, attribute)
       js.operate(%|var elements = document.getElementsByTagName('#{element.tag}');
 var element = undefined;
