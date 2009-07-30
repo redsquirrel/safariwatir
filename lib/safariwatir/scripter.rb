@@ -202,7 +202,7 @@ element.style.backgroundColor = 'yellow';|
     def select_option(element = @element)
       execute(element.operate do
 %|var selected = -1;
-var previous_selection = 0;
+var previous_selection = -2;
 for (var i = 0; i < element.options.length; i++) {
   if (element.options[i].selected) {
     previous_selection = i;
