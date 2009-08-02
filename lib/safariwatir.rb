@@ -35,8 +35,8 @@ module Watir
     
     def speed=(how_fast)
       case how_fast
-      when :fast : set_fast_speed
-      when :slow : set_slow_speed
+      when :fast then set_fast_speed
+      when :slow then set_slow_speed
       else
         raise ArgumentError, "Invalid speed: #{how_fast}"
       end
@@ -481,9 +481,9 @@ module Watir
     
     def contains_text(what)
       case what
-      when Regexp:
+      when Regexp
         text =~ what
-      when String:
+      when String
         text.index(what)
       else
         raise MissingWayOfFindingObjectException
