@@ -480,9 +480,9 @@ module Watir
     
     def contains_text(what)
       case what
-      when Regexp:
+      when Regexp
         text =~ what
-      when String:
+      when String
         text.index(what)
       else
         raise MissingWayOfFindingObjectException
