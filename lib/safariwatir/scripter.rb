@@ -45,13 +45,13 @@ if (element) {
 
       finder = 
       case cell.row.how
-      when :id:
+      when :id
         %|getElementById('#{cell.row.what}')|
-      when :index:
+      when :index
         case cell.row.table.how
         when :id
           %|getElementById('#{cell.row.table.what}').rows[#{cell.row.what-1}]|
-        when :index:
+        when :index
           %|getElementsByTagName('TABLE')[#{cell.row.table.what-1}].rows[#{cell.row.what-1}]|
         else
           raise MissingWayOfFindingObjectException, "Table element does not support #{cell.row.table.how}"
@@ -332,9 +332,10 @@ if (element.onclick) {
       js.operate(find_link(element), yield)
     end
 
+    # This needs to take XPath into account now?
     def find_link(element)
       case element.how
-      when :index:
+      when :index
 %|var element = document.getElementsByTagName('A')[#{element.what-1}];|
       else
 %|var element = undefined;
@@ -351,9 +352,9 @@ for (var i = 0; i < document.links.length; i++) {
     def handle_match(element, how = nil)
       how = {:text => "text", :url => "href"}[element.how] unless how
       case element.what
-        when Regexp:
+        when Regexp
           %|#{how}.match(/#{element.what.source}/#{element.what.casefold? ? "i":nil})|          
-        when String:
+        when String
           %|#{how} == '#{element.what}'|
         else
           raise RuntimeError, "Unable to locate #{element.name} with #{element.how}"
@@ -522,13 +523,13 @@ SCRIPT`
     def execute(script, element = nil)
       response = eval_js(script)
       case response
-        when NO_RESPONSE:
+        when NO_RESPONSE
           nil
-        when ELEMENT_NOT_FOUND:
+        when ELEMENT_NOT_FOUND
           raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}" 
-        when TABLE_CELL_NOT_FOUND:
+        when TABLE_CELL_NOT_FOUND
           raise UnknownCellException, "Unable to locate a table cell with #{element.how} of #{element.what}"
-        when FRAME_NOT_FOUND:
+        when FRAME_NOT_FOUND
           raise UnknownFrameException, "Unable to locate a frame with name #{element.name}" 
         else
           response
