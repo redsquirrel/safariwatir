@@ -2,3 +2,4 @@ Manifest
 .DS_Store
 pkg/*
 doc/*
+.idea
