@@ -119,6 +119,10 @@ module Watir
         self.class.name.split("::").last
       end
 
+      def attr name
+        @scripter.get_attribute(name, self)
+      end
+
       def operate(&block)
         scripter_suffix = OPERATIONS[how]
         if scripter_suffix.kind_of? Hash

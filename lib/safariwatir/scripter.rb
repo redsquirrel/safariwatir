@@ -157,6 +157,11 @@ if (element == undefined) {
     def get_value_for(element = @element)
       execute(element.operate { %|return element.value;| }, element)
     end
+
+    def get_attribute(name, element = @element)
+      execute(element.operate { %|return element.getAttribute('#{name}')| }, element)
+    end
+    
       
     def document_text
       execute(%|return document.getElementsByTagName('BODY').item(0).innerText;|)
