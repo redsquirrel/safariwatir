@@ -439,6 +439,10 @@ var element = elements[0];|, yield)
       operate_by(element, 'src', &block)
     end
 
+    def operate_by_alt(element, &block)
+      operate_by(element, 'alt', &block)
+    end
+
     def operate_by_text(element, &block)
       operate_by(element, 'innerText', &block)
     end

@@ -136,6 +136,7 @@ module Watir
 
       OPERATIONS = {
         :id => "by_id",
+        :alt => "by_alt",
         :index => "by_index",
         :class => "by_class",
         :name => "by_name",
