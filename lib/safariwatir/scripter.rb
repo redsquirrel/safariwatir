@@ -443,6 +443,10 @@ var element = elements[0];|, yield)
       operate_by(element, 'alt', &block)
     end
 
+    def operate_by_action(element, &block)
+      operate_by(element, 'action', &block)
+    end
+
     def operate_by_text(element, &block)
       operate_by(element, 'innerText', &block)
     end
