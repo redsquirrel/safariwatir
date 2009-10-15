@@ -3,6 +3,7 @@ http://twitter.com/swombat/status/1280692921
 
 = SafariWatir
 
+* http://github.com/redsquirrel/safariwatir
 * http://safariwatir.rubyforge.org
 * http://rubyforge.org/mailman/listinfo/safariwatir-general
 * http://twitter.com/SafariWatir
