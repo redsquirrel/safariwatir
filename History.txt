@@ -2,6 +2,7 @@
 
 * Added support for selecting HtmlElements by the action attribute (Jacob Harris)
 * Added support for selecting image elements via the alt attribute (Tom Copeland)
+* Added support for selecting UL/LI elements (Frédéric de Villamil)
 
 === 0.3.6 / 2009-08-17
 

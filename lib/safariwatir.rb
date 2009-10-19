@@ -422,12 +422,12 @@ module Watir
     class Password < TextField
     end
 
-    class Ul
-      def tag; "Ul"; end
+    class Ul < ContentElement
+      def tag; "UL"; end
     end
     
-    class Li
-      def tag; "Li"; end
+    class Li < ContentElement
+      def tag; "LI"; end
     end
 
     # Elements
