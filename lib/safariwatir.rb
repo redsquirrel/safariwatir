@@ -422,6 +422,13 @@ module Watir
     class Password < TextField
     end
 
+    class Ul
+      def tag; "Ul"; end
+    end
+    
+    class Li
+      def tag; "Li"; end
+    end
 
     # Elements
     
@@ -460,6 +467,10 @@ module Watir
     def label(how, what)
       Label.new(scripter, how, what)
     end
+
+    def li(how, what)
+      Li.new(scripter, how, what)
+    end
     
     def link(how, what)
       Link.new(scripter, how, what)
@@ -491,6 +502,10 @@ module Watir
     
     def text_field(how, what)
       TextField.new(scripter, how, what)
+    end
+
+    def ul(how, what)
+      Ul.new(scripter, how, what)
     end
     
     def contains_text(what)
