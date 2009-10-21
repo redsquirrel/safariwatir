@@ -4,8 +4,8 @@ http://twitter.com/swombat/status/1280692921
 = SafariWatir
 
 * http://github.com/redsquirrel/safariwatir
-* http://safariwatir.rubyforge.org
 * http://rubyforge.org/mailman/listinfo/safariwatir-general
+* http://wiki.openqa.org/display/WTR/SafariWatir
 * http://twitter.com/SafariWatir
 
 == DESCRIPTION:
@@ -17,7 +17,6 @@ This project aims at adding Watir support for Safari on the Mac.
 == Requirements
 
 Mac OS X running Safari. Some features require you to turn on "Enable access for assistive devices" in System Preferences > Universal Access.
-
 
 == SYNOPSIS:
 
