@@ -1,4 +1,4 @@
-=== 0.3.7 / 2009-??-??
+=== 0.3.7 / 2009-10-21
 
 * Added support for selecting HtmlElements by the action attribute (Jacob Harris)
 * Added support for selecting image elements via the alt attribute (Tom Copeland)
