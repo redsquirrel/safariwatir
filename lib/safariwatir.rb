@@ -173,6 +173,10 @@ module Watir
       def enabled?
         !@scripter.element_disabled?(self)
       end
+      
+      def disabled?
+        @scripter.element_disabled?(self)
+      end
 
       def tag; "INPUT"; end
 
