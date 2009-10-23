@@ -4,7 +4,7 @@ http://twitter.com/swombat/status/1280692921
 = SafariWatir
 
 * http://github.com/redsquirrel/safariwatir
-* http://rubyforge.org/mailman/listinfo/safariwatir-general
+* http://groups.google.com/group/watir-general
 * http://wiki.openqa.org/display/WTR/SafariWatir
 * http://twitter.com/SafariWatir
 
