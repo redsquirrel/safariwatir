@@ -324,6 +324,10 @@ module Watir
       def tag; "SPAN"; end
     end
 
+    class Map < InputElement
+      def tag; "MAP"; end
+    end
+
     class Table
       def_init :scripter, :how, :what
       attr_reader :how, :what
@@ -430,7 +434,15 @@ module Watir
       def tag; "LI"; end
     end
 
+    class Area < InputElement
+      def tag; "AREA"; end
+    end
+
     # Elements
+
+    def area(how, what)
+      Area.new(scripter, how, what)
+    end
     
     def button(how, what)
       Button.new(scripter, how, what)
@@ -474,6 +486,10 @@ module Watir
     
     def link(how, what)
       Link.new(scripter, how, what)
+    end
+
+    def map(how, what)
+      Map.new(scripter, how, what)
     end
 
     def password(how, what)
