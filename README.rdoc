@@ -42,8 +42,8 @@ Mac OS X running Safari. Some features require you to turn on "Enable access for
 == RUNNING SAFARIWATIR AGAINST WATIR'S CORE TESTS
 
   # First, install the SafariWatir gem (see above)
-  svn checkout https://svn.openqa.org/svn/watir/trunk
-  cd trunk/watir
+  git clone git://github.com/bret/watir.git
+  cd watir/watir    #into your cloned directory
   cp unittests/options.yml.example unittests/options.yml
   # Edit unittests/options.yml and set browser: safari
   ruby unittests/core_tests.rb
