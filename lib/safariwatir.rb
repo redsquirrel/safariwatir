@@ -250,6 +250,27 @@ module Watir
         end
       end
 
+      def href
+        attr('href') || ''
+      end
+      alias :url :href
+
+      def id
+        attr('id') || ''
+      end
+
+      def title
+        attr('title') || ''
+      end
+
+      def class_name
+        attr('class') || ''
+      end
+
+      def style
+        attr('style') || ''
+      end
+
       def tag; "A"; end
     end
 
