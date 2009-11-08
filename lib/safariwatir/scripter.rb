@@ -417,7 +417,7 @@ var element = elements[0];|, yield)
     # Checkboxes/Radios have the same name, different values    
     def handle_form_element_name_match(element)
       element_capture = %|element = elements[i];break;|
-      if element.by_value
+      if element.respond_to?(:by_value) and element.by_value
 %|if (elements[i].value == '#{element.by_value}') {
   #{element_capture}
 }|        
@@ -443,6 +443,10 @@ var element = elements[0];|, yield)
       operate_by(element, 'alt', &block)
     end
 
+    def operate_by_title(element, &block)
+      operate_by(element, 'title', &block)
+    end
+
     def operate_by_action(element, &block)
       operate_by(element, 'action', &block)
     end
@@ -452,8 +456,9 @@ var element = elements[0];|, yield)
     end
 
     def operate_by_xpath(element)
+      xpath = element.what.gsub(/"/, "\'")
       js.operate(%|
-var result = document.evaluate('#{element.what}', document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+var result = document.evaluate("#{xpath}", document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 var element = result ? result.singleNodeValue : null;
 |, yield)
     end
