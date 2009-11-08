@@ -129,7 +129,7 @@ module Watir
           scripter_suffix = scripter_suffix[name]
         end
         if scripter_suffix.nil?
-          raise "SafariWatir does not currently support finding by #{how}"
+          raise Watir::Exception::MissingWayOfFindingObjectException, "SafariWatir does not currently support finding by #{how}"
         end
         @scripter.send("operate_#{scripter_suffix}", self, &block)        
       end
