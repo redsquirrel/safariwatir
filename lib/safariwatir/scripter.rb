@@ -371,7 +371,7 @@ for (var i = 0; i < document.links.length; i++) {
         when String
           %|#{how} == '#{element.what}'|
         else
-          raise RuntimeError, "Unable to locate #{element.name} with #{element.how}"
+          raise RuntimeError, "Unable to locate #{element.element_name} with #{element.how}"
       end
     end
     private :handle_match
@@ -507,13 +507,13 @@ end tell|, true)
       AppleScripter.new(TableJavaScripter.new(element))
     end
 
-    def for_frame(element)
+    def for_frame(frame)
       # verify the frame exists
       execute(
-%|if (parent.#{element.name} == undefined) {
+%|if (parent.#{frame.name} == undefined) {
   return '#{FRAME_NOT_FOUND}';
-}|, element)
-      AppleScripter.new(FrameJavaScripter.new(element))
+}|, frame)
+      AppleScripter.new(FrameJavaScripter.new(frame))
     end
 
     def speak_value_of(element = @element)
@@ -553,11 +553,11 @@ SCRIPT`
         when NO_RESPONSE
           nil
         when ELEMENT_NOT_FOUND
-          raise UnknownObjectException, "Unable to locate #{element.name} element with #{element.how} of #{element.what}" 
+          raise UnknownObjectException, "Unable to locate #{element.element_name} element with #{element.how} of #{element.what}"
         when TABLE_CELL_NOT_FOUND
           raise UnknownCellException, "Unable to locate a table cell with #{element.how} of #{element.what}"
         when FRAME_NOT_FOUND
-          raise UnknownFrameException, "Unable to locate a frame with name #{element.name}" 
+          raise UnknownFrameException, "Unable to locate a frame with name #{element.element_name}"
         else
           response
       end

@@ -102,12 +102,12 @@ module Watir
 
       # overridden in derivitives
       def tag
-        raise RuntimeError, "tag not provided for #{name}"
+        raise RuntimeError, "tag not provided for #{element_name}"
       end
 
       # overridden in derivitives
       def speak
-        @scripter.speak("#{name}'s don't know how to speak.")
+        @scripter.speak("#{element_name}'s don't know how to speak.")
       end
 
       def exists?
@@ -115,7 +115,7 @@ module Watir
       end
       alias :exist? :exists?
       
-      def name
+      def element_name
         self.class.name.split("::").last
       end
 
@@ -126,7 +126,7 @@ module Watir
       def operate(&block)
         scripter_suffix = OPERATIONS[how]
         if scripter_suffix.kind_of? Hash
-          scripter_suffix = scripter_suffix[name]
+          scripter_suffix = scripter_suffix[element_name]
         end
         if scripter_suffix.nil?
           raise Watir::Exception::MissingWayOfFindingObjectException, "SafariWatir does not currently support finding by #{how}"
@@ -273,6 +273,10 @@ module Watir
 
       def style
         attr('style') || ''
+      end
+
+      def name
+        attr('name') || ''
       end
 
       def tag; "A"; end
