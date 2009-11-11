@@ -39,11 +39,15 @@ Mac OS X running Safari. Some features require you to turn on "Enable access for
   cd safariwatir
   rake install
 
-== RUNNING SAFARIWATIR AGAINST WATIR'S CORE TESTS
+== RUNNING SAFARIWATIR AGAINST WATIRSPEC
 
-  # First, install the SafariWatir gem (see above)
-  git clone git://github.com/bret/watir.git
-  cd watir/watir    #into your cloned directory
-  cp unittests/options.yml.example unittests/options.yml
-  # Edit unittests/options.yml and set browser: safari
-  ruby unittests/core_tests.rb
+  git clone git://github.com/redsquirrel/safariwatir.git
+  cd safariwatir
+  spec spec
+
+== CONTRIBUTING:
+
+WatirSpec is the emergent standard for the Watir API.
+We do not currently support all of the functionality described by WatirSpec.
+A good way to contribute would be to fix a few failing specs as defined by WatirSpec.
+See "Running SafairWatir Against WatirSpec" to get started. 
