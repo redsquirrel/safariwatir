@@ -37,12 +37,14 @@ Mac OS X running Safari. Some features require you to turn on "Enable access for
 
   git clone git://github.com/redsquirrel/safariwatir.git
   cd safariwatir
+  git submodule update --init
   rake install
 
 == RUNNING SAFARIWATIR AGAINST WATIRSPEC
 
   git clone git://github.com/redsquirrel/safariwatir.git
   cd safariwatir
+  git submodule update --init
   spec spec
 
 == CONTRIBUTING:
