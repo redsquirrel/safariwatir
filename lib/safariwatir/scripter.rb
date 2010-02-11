@@ -364,7 +364,7 @@ for (var i = 0; i < document.links.length; i++) {
     private :find_link
 
     def handle_match(element, how = nil)
-      how = {:text => "text", :url => "href"}[element.how] unless how
+      how = {:text => "text", :url => "href", :id => "id"}[element.how] unless how
       case element.what
         when Regexp
           %|#{how}.match(/#{element.what.source}/#{element.what.casefold? ? "i":nil})|          
