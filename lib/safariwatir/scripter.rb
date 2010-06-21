@@ -71,8 +71,8 @@ if (element) {
 
     def wrap(script)
       # add in frame name when referencing parent or document
-      script.gsub! "parent", "parent.#{@page_container}"
-      script.gsub! "document", "#{@page_container}.document"
+      script.gsub! /\bparent\b/, "parent.#{@page_container}"
+      script.gsub! /\bdocument\b/, "#{@page_container}.document"
       super(script)
     end
   end
