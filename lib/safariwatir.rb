@@ -452,6 +452,9 @@ module Watir
         end
       end
     end
+    
+    class TextArea < TextField
+    end
 
     class Password < TextField
     end
@@ -548,6 +551,10 @@ module Watir
     
     def text_field(how, what)
       TextField.new(scripter, how, what)
+    end
+    
+    def text_area(how, what)
+      TextArea.new(scripter, how, what)
     end
 
     def ul(how, what)
