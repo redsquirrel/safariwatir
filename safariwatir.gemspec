@@ -1,6 +1,8 @@
 # -*- encoding: utf-8 -*-
 
-Gem::Specification.new do |s|
+require 'rubygems'
+
+spec = Gem::Specification.new do |s|
   s.name = %q{safariwatir}
   s.version = "0.3.8"
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
@@ -29,3 +31,5 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rb-appscript>, [">= 0"])
   end
 end
+
+Gem::Builder.new(spec).build if $0 == __FILE__
