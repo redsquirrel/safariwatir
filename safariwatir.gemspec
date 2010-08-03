@@ -2,10 +2,10 @@
 
 Gem::Specification.new do |s|
   s.name = %q{safariwatir}
-  s.version = "0.3.7"
+  s.version = "0.3.8"
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dave Hoover", "Tom Copeland"]
-  s.date = %q{2009-10-20}
+  s.date = Time.now.strftime("%Y-%m-%d")
   s.description = %q{WATIR stands for "Web Application Testing in Ruby".  See WATIR project for more information.  This is a Safari-version of the original IE-only WATIR.}
   s.email = %q{dave@obtiva.com}
   s.extra_rdoc_files = ["lib/safariwatir/core_ext.rb", "lib/safariwatir/scripter.rb", "lib/safariwatir.rb", "lib/watir/exceptions.rb", "README.rdoc"]
