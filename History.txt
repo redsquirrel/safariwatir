@@ -1,6 +1,7 @@
 === 0.3.9 / ?????
 
-* Added  support for H tags of various sizes (Trey Evans)
+* Added support for H tags of various sizes (Trey Evans)
+* Better Watirpec compliance for buttons (Trey Evans)
 * Make rb-appscript a runtime dependency (Ben Lavender)
 
 === 0.3.8 / 2010-08-02
