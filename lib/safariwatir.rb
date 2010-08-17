@@ -105,6 +105,8 @@ module Watir
       extend ElementAttributes
       html_attr_reader :class_name, "class"
       html_attr_reader :id
+      html_attr_reader :name
+      html_attr_reader :title
 
       def type; nil; end
 
@@ -119,7 +121,7 @@ module Watir
       end
 
       def exists?
-        unless [String, Regexp].any? { |allowed_class| what.kind_of?(allowed_class) }
+        unless [Fixnum, String, Regexp].any? { |allowed_class| what.kind_of?(allowed_class) }
           raise TypeError.new("May not search using a 'what' value of class #{what.class.name}")
         end
         @scripter.element_exists?(self)
@@ -262,6 +264,8 @@ module Watir
     end
 
     class Label < ContentElement
+
+      html_attr_reader :for
       def tag; "LABEL"; end
     end
 
