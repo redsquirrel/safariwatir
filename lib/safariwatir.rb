@@ -100,6 +100,15 @@ module Watir
       def_init :scripter, :how, :what
       attr_reader :how, :what
 
+      def class_name
+        attr("class")
+      end
+
+      # required by watir specs
+      def id
+        attr("id") ? attr("id") : ""
+      end
+
       # overridden in derivitives
       def tag
         raise RuntimeError, "tag not provided for #{element_name}"
@@ -111,6 +120,9 @@ module Watir
       end
 
       def exists?
+        unless [String, Regexp].any? { |allowed_class| what.kind_of?(allowed_class) }
+          raise TypeError.new("May not search using a 'what' value of class #{what.class.name}")
+        end
         @scripter.element_exists?(self)
       end
       alias :exist? :exists?
@@ -227,6 +239,16 @@ module Watir
         return if !check_it && !checked?
         click
       end
+    end
+
+    class Header < ContentElement
+      
+      def initialize(scripter, how, what, h_size = 1)
+        super(scripter, how, what)
+        @size = 1
+      end
+      
+      def tag; "H#{@size}"; end
     end
 
     class Div < ContentElement
@@ -505,6 +527,30 @@ module Watir
       Frame.new(scripter, name)
     end
     
+    def h1(how, what)
+      Header.new(scripter, how, what, 1)
+    end
+
+    def h2(how, what)
+      Header.new(scripter, how, what, 2)
+    end
+
+    def h3(how, what)
+      Header.new(scripter, how, what, 3)
+    end
+
+    def h4(how, what)
+      Header.new(scripter, how, what, 4)
+    end
+
+    def h5(how, what)
+      Header.new(scripter, how, what, 5)
+    end
+
+    def h6(how, what)
+      Header.new(scripter, how, what, 6)
+    end
+
     def image(how, what)
       Image.new(scripter, how, what)
     end
