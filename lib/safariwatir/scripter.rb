@@ -553,7 +553,7 @@ SCRIPT`
         when NO_RESPONSE
           nil
         when ELEMENT_NOT_FOUND
-          raise UnknownObjectException, "Unable to locate #{element.element_name} element with #{element.how} of #{element.what}"
+          raise UnknownObjectException, "Unable to locate #{element.element_name}, using :#{element.how} and \"#{element.what}\""
         when TABLE_CELL_NOT_FOUND
           raise UnknownCellException, "Unable to locate a table cell with #{element.how} of #{element.what}"
         when FRAME_NOT_FOUND

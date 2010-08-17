@@ -1,6 +1,7 @@
 require 'watir/exceptions'
 require 'safariwatir/scripter'
 require 'safariwatir/core_ext'
+require 'safariwatir/element_attributes'
 
 module Watir
   include Watir::Exception
@@ -100,14 +101,12 @@ module Watir
       def_init :scripter, :how, :what
       attr_reader :how, :what
 
-      def class_name
-        attr("class")
-      end
-
       # required by watir specs
-      def id
-        attr("id") ? attr("id") : ""
-      end
+      extend ElementAttributes
+      html_attr_reader :class_name, "class"
+      html_attr_reader :id
+
+      def type; nil; end
 
       # overridden in derivitives
       def tag
@@ -163,6 +162,7 @@ module Watir
         :title => "by_title",
         :xpath => "by_xpath",
       }
+
     end
 
     class Form < HtmlElement
@@ -178,6 +178,8 @@ module Watir
     class InputElement < HtmlElement
       include Clickable
       
+      html_attr_reader :type
+
       def speak
         @scripter.speak_value_of(self)
       end
