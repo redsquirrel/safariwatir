@@ -1,3 +1,12 @@
+=== 0.3.9 / ?????
+
+* Added  support for H tags of various sizes (Trey Evans)
+
+=== 0.3.8 / 2010-08-02
+
+* Added support for textareas (Tom Copeland)
+* Prevent things like 'element.parentNode' being replaced wrongly (Luke Hudson)
+
 === 0.3.7 / 2009-10-21
 
 * Added support for selecting HtmlElements by the action attribute (Jacob Harris)
