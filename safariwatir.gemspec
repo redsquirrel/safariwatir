@@ -4,7 +4,7 @@ require 'rubygems'
 
 spec = Gem::Specification.new do |s|
   s.name = %q{safariwatir}
-  s.version = "0.3.8"
+  s.version = "0.3.9u"
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dave Hoover", "Tom Copeland"]
   s.date = Time.now.strftime("%Y-%m-%d")
