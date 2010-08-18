@@ -454,6 +454,7 @@ module Watir
     end
 
     class TextField < InputElement
+
       def set(value)
         value = value.to_s
         @scripter.focus(self)
@@ -469,6 +470,8 @@ module Watir
       def getContents
         @scripter.get_value_for(self)
       end
+
+      alias :value :getContents
       
       def verify_contains(expected)
         actual = getContents
@@ -482,6 +485,12 @@ module Watir
     end
     
     class TextArea < TextField
+    end
+
+    class FileField < TextField
+      def set(value)
+        @scripter.set_file_field(self, value.to_s)
+      end
     end
 
     class Password < TextField
@@ -607,6 +616,10 @@ module Watir
     
     def text_area(how, what)
       TextArea.new(scripter, how, what)
+    end
+
+    def file_field(how, what)
+      FileField.new(scripter, how, what)
     end
 
     def ul(how, what)

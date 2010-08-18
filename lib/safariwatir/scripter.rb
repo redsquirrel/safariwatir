@@ -272,6 +272,26 @@ element.setSelectionRange(element.value.length, element.value.length);|
       end, element)
     end
 
+    def set_file_field(element, value)
+      file_base_name = File.basename(value)
+      click_element(element)
+      sleep 0.4
+      se = Appscript.app("System Events")
+      open_popup = se.processes["Safari"].windows[1].sheets[1]
+      choose_button = open_popup.buttons[1]
+      search_field = open_popup.groups[1].text_fields[1]
+      search_by_file_name = open_popup.groups[1].splitter_groups[1].radio_groups[1].checkboxes[6]
+      sr_outline = open_popup.groups[1].splitter_groups[1].scroll_areas[2].outlines[1]
+      confirm_search_action = search_field.actions[2].get    
+      search_field.value.set(file_base_name)
+      search_field.perform(confirm_search_action)
+      sleep 2
+      search_by_file_name.click
+      sleep 1
+      sr_outline.rows[1].select
+      choose_button.click
+    end
+
     def click_element(element = @element)
       page_load do
 # Not sure if these events should be either/or. But if you have an image with an onclick, it fires twice without the else clause.
