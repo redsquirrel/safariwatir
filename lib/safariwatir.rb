@@ -85,18 +85,6 @@ module Watir
       end
     end
 
-    class Frame
-      include Container
-      include PageContainer
-      
-      attr_reader :name
-      
-      def initialize(scripter, name)
-        @name = name
-        @scripter = scripter.for_frame(self)
-      end
-    end
-
     class HtmlElement
       def_init :scripter, :how, :what
       attr_reader :how, :what
@@ -165,6 +153,36 @@ module Watir
         :xpath => "by_xpath",
       }
 
+    end
+
+    class FrameElement < HtmlElement
+      def tag; "frame"; end
+    end
+
+    class Frame
+      include Container
+      include PageContainer
+  
+      attr_reader :how, :what
+
+      def tag
+        @element.tag
+      end
+
+      def id
+        @element.id
+      end
+    
+      def name
+        @element.name
+      end     
+ 
+      def initialize(scripter, how, what)
+        @how = how
+        @what = what
+        @element = FrameElement.new(scripter, how, what)
+        @scripter = scripter.for_frame(self)
+      end
     end
 
     class Form < HtmlElement
@@ -538,8 +556,8 @@ module Watir
       Form.new(scripter, how, what)
     end
 
-    def frame(name)
-      Frame.new(scripter, name)
+    def frame(how, what)
+      Frame.new(scripter, how, what)
     end
     
     def h1(how, what)

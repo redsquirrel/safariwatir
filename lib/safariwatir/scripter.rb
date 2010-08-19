@@ -65,14 +65,26 @@ if (element) {
   end
 
   class FrameJavaScripter < JavaScripter # :nodoc:
+
     def initialize(frame)
-      @page_container = "parent.#{frame.name}"
+      @page_container = "DOCUMENT.#{build_locator(frame)}"
+    end
+
+    def build_locator(frame)
+      case frame.how
+      when :id
+        "getElementById('#{frame.id}')"
+      when :index
+        "getElementsByTagName('#{frame.tag}')[#{frame.what.to_i - 1}]"
+      else
+        "getElementsByName('#{frame.what}')[0]"
+      end
     end
 
     def wrap(script)
       # add in frame name when referencing parent or document
       script.gsub! /\bparent\b/, "parent.#{@page_container}"
-      script.gsub! /\bdocument\b/, "#{@page_container}.document"
+      script.gsub! /\bdocument\b/, "#{@page_container}.contentDocument"
       super(script)
     end
   end
@@ -100,6 +112,7 @@ if (element) {
       @appname = opts[:appname] || "Safari"
       @app = Appscript.app(@appname)
       @document = @app.documents[1]
+      @typing_lag = 0.08
     end
               
     def ensure_window_ready
