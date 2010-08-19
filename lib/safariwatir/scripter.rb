@@ -14,7 +14,21 @@ function dispatchOnChange(element) {
   var event = document.createEvent('HTMLEvents');
   event.initEvent('change', true, true);  
   element.dispatchEvent(event);
-}|
+}
+
+function findByTagNames(scope, names) {
+  var result_array = [];
+  var found_tags = null;
+
+  for (var i = 0; i < names.length; i++) {
+    found_tags = scope.getElementsByTagName(names[i]);
+    for (var j = 0; j < found_tags.length; j++) {
+      result_array.push(found_tags[j]);
+    }
+  }
+  return(result_array);
+}
+|
 
   class JavaScripter # :nodoc:
     def operate(locator, operation)
@@ -67,17 +81,17 @@ if (element) {
   class FrameJavaScripter < JavaScripter # :nodoc:
 
     def initialize(frame)
-      @page_container = "DOCUMENT.#{build_locator(frame)}"
+      @page_container = build_locator(frame)
     end
 
     def build_locator(frame)
       case frame.how
       when :id
-        "getElementById('#{frame.id}')"
+        "DOCUMENT.getElementById('#{frame.id}')"
       when :index
-        "getElementsByTagName('#{frame.tag}')[#{frame.what.to_i - 1}]"
+        "findByTagNames(DOCUMENT, ['frame', 'iframe'])[#{frame.what.to_i - 1}]"
       else
-        "getElementsByName('#{frame.what}')[0]"
+        "DOCUMENT.getElementsByName('#{frame.what}')[0]"
       end
     end
 
@@ -435,7 +449,7 @@ for (var i = 0; i < elements.length; i++) {
 var elements = document.getElementsByName('#{element.what}');
 var element = undefined;
 for (var i = 0; i < elements.length; i++) {
-  if (elements[i].tagName != 'META' && elements[i].tagName == '#{element.tag}') {
+  if (elements[i].tagName != 'META' && #{tag_names(element)}.indexOf(elements[i].tagName) != 0) {
     #{handle_form_element_name_match(element)}
   }
 }|, yield)
@@ -465,7 +479,7 @@ var element = elements[0];|, yield)
     end
 
     def operate_by_index(element)
-      js.operate(%|var element = document.getElementsByTagName('#{element.tag}')[#{element.what-1}];|, yield)
+      js.operate(%|var element = findByTagNames(document, #{tag_names(element)})[#{element.what-1}];|, yield)
     end
 
     def operate_by_src(element, &block)
@@ -579,6 +593,11 @@ SCRIPT`
 
 
     private
+
+    def tag_names(element = @element)
+      t_names = element.tag.kind_of?(Array) ? element.tag : [element.tag]
+      "[" + (t_names.map { |t_name| "\"#{t_name.downcase}\"" }.join(", ")) + "]"
+    end
 
     def execute(script, element = nil)
       response = eval_js(script)

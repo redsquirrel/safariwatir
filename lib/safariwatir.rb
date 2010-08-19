@@ -156,31 +156,31 @@ module Watir
     end
 
     class FrameElement < HtmlElement
-      def tag; "frame"; end
+      def tag; ["frame", "iframe"]; end
     end
 
     class Frame
       include Container
       include PageContainer
   
-      attr_reader :how, :what
+      attr_reader :how, :what, :scripter
 
       def tag
-        @element.tag
+        @frame_element.tag
       end
 
       def id
-        @element.id
+        @frame_element.id
       end
     
       def name
-        @element.name
+        @frame_element.name
       end     
  
       def initialize(scripter, how, what)
         @how = how
         @what = what
-        @element = FrameElement.new(scripter, how, what)
+        @frame_element = FrameElement.new(scripter, how, what)
         @scripter = scripter.for_frame(self)
       end
     end
