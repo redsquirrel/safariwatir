@@ -10,10 +10,21 @@ module Watir # :nodoc:
   EXTRA_ACTION_SUCCESS = "__safari_watir_extra_action__"
   
   JS_LIBRARY = %|
-function dispatchOnChange(element) {
+function dispatchOnChange(scope, element) {
   var event = document.createEvent('HTMLEvents');
   event.initEvent('change', true, true);  
   element.dispatchEvent(event);
+}
+
+function findByNameAttribute(scope, name, tags) {
+  var result_array = [];
+  var found_tags = scope.getElementsByName(name);
+  for (var i = 0; i < found_tags.length; i++) {
+    if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
+      result_array.push(found_tags[j]);
+    }
+  }
+  return(result_array);
 }
 
 function findByTagNames(scope, names) {
@@ -431,6 +442,11 @@ for (var i = 0; i < document.links.length; i++) {
     def element_disabled?(element = @element)      
       execute(element.operate { %|return element.disabled;| }, element)
     end
+
+    def operate_by_locator(element)
+      js.operate(%|var element = #{element.locator};
+|, yield)
+    end
   
     def operate_by_input_value(element)
       js.operate(%|
@@ -440,17 +456,6 @@ for (var i = 0; i < elements.length; i++) {
   if (elements[i].value == '#{element.what}') {
     element = elements[i];
     break;
-  }
-}|, yield)
-    end
-
-    def operate_by_name(element)
-      js.operate(%|
-var elements = document.getElementsByName('#{element.what}');
-var element = undefined;
-for (var i = 0; i < elements.length; i++) {
-  if (elements[i].tagName != 'META' && #{tag_names(element)}.indexOf(elements[i].tagName) != 0) {
-    #{handle_form_element_name_match(element)}
   }
 }|, yield)
     end
@@ -473,14 +478,6 @@ var element = elements[0];|, yield)
       end
     end
     private :handle_form_element_name_match
-
-    def operate_by_id(element)
-      js.operate("var element = document.getElementById('#{element.what}');", yield)
-    end
-
-    def operate_by_index(element)
-      js.operate(%|var element = findByTagNames(document, #{tag_names(element)})[#{element.what-1}];|, yield)
-    end
 
     def operate_by_src(element, &block)
       operate_by(element, 'src', &block)

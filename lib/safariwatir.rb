@@ -2,6 +2,7 @@ require 'watir/exceptions'
 require 'safariwatir/scripter'
 require 'safariwatir/core_ext'
 require 'safariwatir/element_attributes'
+require 'safariwatir/locators'
 
 module Watir
   include Watir::Exception
@@ -86,8 +87,10 @@ module Watir
     end
 
     class HtmlElement
-      def_init :scripter, :how, :what
-      attr_reader :how, :what
+      def_init :parent, :scripter, :how, :what
+      attr_reader :how, :what, :parent
+
+      include Locators
 
       # required by watir specs
       extend ElementAttributes
@@ -125,6 +128,8 @@ module Watir
       end
 
       def operate(&block)
+        @scripter.operate_by_locator(self, &block)
+=begin
         scripter_suffix = OPERATIONS[how]
         if scripter_suffix.kind_of? Hash
           scripter_suffix = scripter_suffix[element_name]
@@ -133,6 +138,7 @@ module Watir
           raise Watir::Exception::MissingWayOfFindingObjectException, "SafariWatir does not currently support finding by #{how}"
         end
         @scripter.send("operate_#{scripter_suffix}", self, &block)        
+=end
       end
 
       OPERATIONS = {
@@ -155,38 +161,24 @@ module Watir
 
     end
 
-    class FrameElement < HtmlElement
-      def tag; ["frame", "iframe"]; end
-    end
-
     class Frame
       include Container
       include PageContainer
+      include Locators
+
+      def tag; ["frame", "iframe"]; end
+
+      def locator
+        self.send("locator_by_#{how}".to_sym).to_s + ".contentDocument"
+      end
   
-      attr_reader :how, :what, :scripter
+      attr_reader :parent, :how, :what, :scripter
 
-      def tag
-        @frame_element.tag
-      end
-
-      def id
-        @frame_element.id
-      end
-    
-      def name
-        @frame_element.name
-      end     
- 
-      def initialize(scripter, how, what)
-        @how = how
-        @what = what
-        @frame_element = FrameElement.new(scripter, how, what)
-        @scripter = scripter.for_frame(self)
-      end
+      def_init :parent, :scripter, :how, :what
     end
 
     class Form < HtmlElement
-      def_init :scripter, :how, :what
+      def_init :parent, :scripter, :how, :what
 
       def submit
         @scripter.submit_form(self)
@@ -245,7 +237,7 @@ module Watir
     end
         
     class Checkbox < InputElement
-      def_init :scripter, :how, :what, :value
+      def_init :parent, :scripter, :how, :what, :value
       
       def by_value
         @value
@@ -265,8 +257,8 @@ module Watir
 
     class Header < ContentElement
       
-      def initialize(scripter, how, what, h_size = 1)
-        super(scripter, how, what)
+      def initialize(parent, scripter, how, what, h_size = 1)
+        super(parent, scripter, how, what)
         @size = 1
       end
       
@@ -405,7 +397,7 @@ module Watir
     end
 
     class Table
-      def_init :scripter, :how, :what
+      def_init :parent, :scripter, :how, :what
       attr_reader :how, :what
       
       def each
@@ -503,6 +495,7 @@ module Watir
     end
     
     class TextArea < TextField
+      def tag; ["input", "textarea"]; end
     end
 
     class FileField < TextField
@@ -529,119 +522,119 @@ module Watir
     # Elements
 
     def area(how, what)
-      Area.new(scripter, how, what)
+      Area.new(self, scripter, how, what)
     end
     
     def button(how, what)
-      Button.new(scripter, how, what)
+      Button.new(self, scripter, how, what)
     end
 
     def cell(how, what)
-      TableCell.new(scripter, how, what)
+      TableCell.new(self, scripter, how, what)
     end
 
     def checkbox(how, what, value = nil)
-      Checkbox.new(scripter, how, what, value)
+      Checkbox.new(self, scripter, how, what, value)
     end
 
     def div(how, what)
-      Div.new(scripter, how, what)
+      Div.new(self, scripter, how, what)
     end
     
     def p(how, what)
-      P.new(scripter, how, what)
+      P.new(self, scripter, how, what)
     end
 
     def form(how, what)
-      Form.new(scripter, how, what)
+      Form.new(self, scripter, how, what)
     end
 
     def frame(how, what)
-      Frame.new(scripter, how, what)
+      Frame.new(self, scripter, how, what)
     end
     
     def h1(how, what)
-      Header.new(scripter, how, what, 1)
+      Header.new(self, scripter, how, what, 1)
     end
 
     def h2(how, what)
-      Header.new(scripter, how, what, 2)
+      Header.new(self, scripter, how, what, 2)
     end
 
     def h3(how, what)
-      Header.new(scripter, how, what, 3)
+      Header.new(self, scripter, how, what, 3)
     end
 
     def h4(how, what)
-      Header.new(scripter, how, what, 4)
+      Header.new(self, scripter, how, what, 4)
     end
 
     def h5(how, what)
-      Header.new(scripter, how, what, 5)
+      Header.new(self, scripter, how, what, 5)
     end
 
     def h6(how, what)
-      Header.new(scripter, how, what, 6)
+      Header.new(self, scripter, how, what, 6)
     end
 
     def image(how, what)
-      Image.new(scripter, how, what)
+      Image.new(self, scripter, how, what)
     end
 
     def label(how, what)
-      Label.new(scripter, how, what)
+      Label.new(self, scripter, how, what)
     end
 
     def li(how, what)
-      Li.new(scripter, how, what)
+      Li.new(self, scripter, how, what)
     end
     
     def link(how, what)
-      Link.new(scripter, how, what)
+      Link.new(self, scripter, how, what)
     end
 
     def map(how, what)
-      Map.new(scripter, how, what)
+      Map.new(self, scripter, how, what)
     end
 
     def password(how, what)
-      Password.new(scripter, how, what)
+      Password.new(self, scripter, how, what)
     end
 
     def radio(how, what, value = nil)
-      Radio.new(scripter, how, what, value)
+      Radio.new(self, scripter, how, what, value)
     end
 
     def row(how, what)
-      TableRow.new(scripter, how, what)
+      TableRow.new(self, scripter, how, what)
     end
 
     def select_list(how, what)
-      SelectList.new(scripter, how, what)
+      SelectList.new(self, scripter, how, what)
     end
     
     def span(how, what)
-      Span.new(scripter, how, what)
+      Span.new(self, scripter, how, what)
     end
 
     def table(how, what)
-      Table.new(scripter, how, what)
+      Table.new(self, scripter, how, what)
     end
     
     def text_field(how, what)
-      TextField.new(scripter, how, what)
+      TextField.new(self, scripter, how, what)
     end
     
     def text_area(how, what)
-      TextArea.new(scripter, how, what)
+      TextArea.new(self, scripter, how, what)
     end
 
     def file_field(how, what)
-      FileField.new(scripter, how, what)
+      FileField.new(self, scripter, how, what)
     end
 
     def ul(how, what)
-      Ul.new(scripter, how, what)
+      Ul.new(self, scripter, how, what)
     end
     
     def contains_text(what)
@@ -676,6 +669,8 @@ module Watir
     def url
       scripter.url
     end
+
+    def locator; "document"; end
     
     # Hide's Safari
     def hide
