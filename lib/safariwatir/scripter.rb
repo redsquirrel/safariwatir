@@ -22,9 +22,9 @@ function findByXPath(dscope, scope, expr) {
   return(result ? result.singleNodeValue : null );
 }
 
-function findByNameAttribute(dscope, scope, name, tags) {
+function filterToTagNames(found_tags, tags) {
   var result_array = [];
-  var found_tags = dscope.getElementsByName(name);
+
   for (var i = 0; i < found_tags.length; i++) {
     if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
       result_array.push(found_tags[i]);
@@ -33,15 +33,15 @@ function findByNameAttribute(dscope, scope, name, tags) {
   return(result_array);
 }
 
+
+function findByNameAttribute(dscope, scope, name, tags) {
+  var found_tags = dscope.getElementsByName(name);
+  return( filterToTagNames(tags) );
+}
+
 function findByClassName(scope, cname, tags) {
-  var result_array = [];
   var found_tags = scope.getElementsByClassName(cname);
-  for (var i = 0; i < found_tags.length; i++) {
-    if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
-      result_array.push(found_tags[i]);
-    }
-  }
-  return(result_array);
+  return( filterToTagNames(tags) );
 }
 
 function findByTagNames(scope, names) {
