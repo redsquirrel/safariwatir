@@ -10,10 +10,16 @@ module Watir # :nodoc:
   EXTRA_ACTION_SUCCESS = "__safari_watir_extra_action__"
   
   JS_LIBRARY = %|
+/* Library functions */
 function dispatchOnChange(scope, element) {
-  var event = document.createEvent('HTMLEvents');
+  var event = scope.createEvent('HTMLEvents');
   event.initEvent('change', true, true);  
   element.dispatchEvent(event);
+}
+
+function findByXPath(dscope, scope, expr) {
+  var result = dscope.evaluate(expr, scope, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+  return(result ? result.singleNodeValue : null );
 }
 
 function findByNameAttribute(scope, name, tags) {
@@ -21,7 +27,7 @@ function findByNameAttribute(scope, name, tags) {
   var found_tags = scope.getElementsByName(name);
   for (var i = 0; i < found_tags.length; i++) {
     if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
-      result_array.push(found_tags[j]);
+      result_array.push(found_tags[i]);
     }
   }
   return(result_array);
@@ -39,6 +45,8 @@ function findByTagNames(scope, names) {
   }
   return(result_array);
 }
+
+/* Action Code */
 |
 
   class JavaScripter # :nodoc:
@@ -86,31 +94,6 @@ if (element) {
       end
       
       finder + %|.cells[#{cell.what-1}]|
-    end
-  end
-
-  class FrameJavaScripter < JavaScripter # :nodoc:
-
-    def initialize(frame)
-      @page_container = build_locator(frame)
-    end
-
-    def build_locator(frame)
-      case frame.how
-      when :id
-        "DOCUMENT.getElementById('#{frame.id}')"
-      when :index
-        "findByTagNames(DOCUMENT, ['frame', 'iframe'])[#{frame.what.to_i - 1}]"
-      else
-        "DOCUMENT.getElementsByName('#{frame.what}')[0]"
-      end
-    end
-
-    def wrap(script)
-      # add in frame name when referencing parent or document
-      script.gsub! /\bparent\b/, "parent.#{@page_container}"
-      script.gsub! /\bdocument\b/, "#{@page_container}.contentDocument"
-      super(script)
     end
   end
 
@@ -259,7 +242,7 @@ if (selected == -1) {
   return '#{ELEMENT_NOT_FOUND}';
 } else if (previous_selection != selected) {        
   element.selectedIndex = selected;
-  dispatchOnChange(element.options[selected]);
+  dispatchOnChange(#{element.document_locator}, element.options[selected]);
 }
 |
       end, element)
@@ -305,8 +288,9 @@ return selected;|
       sleep typing_lag
       execute(element.operate do 
 %|element.value += '#{value}';
-dispatchOnChange(element);
-element.setSelectionRange(element.value.length, element.value.length);| 
+dispatchOnChange(#{element.document_locator}, element);
+element.setSelectionRange(element.value.length, element.value.length);
+| 
       end, element)
     end
 
@@ -499,14 +483,6 @@ var element = elements[0];|, yield)
       operate_by(element, 'innerText', &block)
     end
 
-    def operate_by_xpath(element)
-      xpath = element.what.gsub(/"/, "\'")
-      js.operate(%|
-var result = document.evaluate("#{xpath}", document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-var element = result ? result.singleNodeValue : null;
-|, yield)
-    end
-
     def operate_by(element, attribute)
       js.operate(%|var elements = document.getElementsByTagName('#{element.tag}');
 var element = undefined;
@@ -549,15 +525,6 @@ end tell|, true)
 
     def for_table(element)
       AppleScripter.new(TableJavaScripter.new(element))
-    end
-
-    def for_frame(frame)
-      # verify the frame exists
-      execute(
-%|if (parent.#{frame.name} == undefined) {
-  return '#{FRAME_NOT_FOUND}';
-}|, frame)
-      AppleScripter.new(FrameJavaScripter.new(frame))
     end
 
     def speak_value_of(element = @element)

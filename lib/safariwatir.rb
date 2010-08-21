@@ -168,6 +168,8 @@ module Watir
 
       def tag; ["frame", "iframe"]; end
 
+      def document_locator; locator; end
+
       def locator
         self.send("locator_by_#{how}".to_sym).to_s + ".contentDocument"
       end
@@ -671,6 +673,7 @@ module Watir
     end
 
     def locator; "document"; end
+    def document_locator; "document"; end
     
     # Hide's Safari
     def hide

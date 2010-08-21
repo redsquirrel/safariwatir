@@ -1,11 +1,22 @@
+require File.dirname(__FILE__) + '/../watir/exceptions'
+
 module Locators
+  
+  def document_locator
+    parent.document_locator
+  end
 
   def locator
     self.send("locator_by_#{how}".to_sym)
   end
 
+  def locator_by_xpath
+    xpath = what.gsub(/"/, "\'")
+    "findByXPath(#{document_locator}, #{parent.locator}, \"#{xpath}\")"
+  end
+
   def locator_by_name
-    "findByNameAttribute(#{parent.locator}, \"#{what.to_s}\", #{tag_names})"
+    "findByNameAttribute(#{parent.locator}, \"#{what.to_s}\", #{tag_names})[0]"
   end
 
   def locator_by_index
@@ -19,6 +30,13 @@ module Locators
   def tag_names
       t_names = tag.kind_of?(Array) ? tag : [tag]
       "[" + (t_names.map { |t_name| "\"#{t_name.downcase}\"" }.join(", ")) + "]"
+  end
+
+  def method_missing(*args)
+    if args[0].to_s =~ /locator_by_/
+      raise Watir::Exception::MissingWayOfFindingObjectException
+    end
+    super(*args)
   end
 
 end
