@@ -16,15 +16,19 @@ module Locators
   end
 
   def locator_by_name
-    "findByNameAttribute(#{parent.locator}, \"#{what.to_s}\", #{tag_names})[0]"
+    "findByNameAttribute(#{document_locator}, #{parent.locator}, \"#{what.to_s}\", #{tag_names})[0]"
   end
 
   def locator_by_index
     "findByTagNames(#{parent.locator}, #{tag_names})[#{what.to_i - 1}]"
   end
 
+  def locator_by_class
+    "findByClassName(#{parent.locator}, \"#{what}\", #{tag_names})[0]"
+  end
+
   def locator_by_id
-    "#{parent.locator}.getElementById(\"#{what.to_s}\")"
+    "#{document_locator}.getElementById(\"#{what.to_s}\")"
   end
 
   def tag_names

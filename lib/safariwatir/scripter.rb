@@ -22,9 +22,20 @@ function findByXPath(dscope, scope, expr) {
   return(result ? result.singleNodeValue : null );
 }
 
-function findByNameAttribute(scope, name, tags) {
+function findByNameAttribute(dscope, scope, name, tags) {
   var result_array = [];
-  var found_tags = scope.getElementsByName(name);
+  var found_tags = dscope.getElementsByName(name);
+  for (var i = 0; i < found_tags.length; i++) {
+    if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
+      result_array.push(found_tags[i]);
+    }
+  }
+  return(result_array);
+}
+
+function findByClassName(scope, cname, tags) {
+  var result_array = [];
+  var found_tags = scope.getElementsByClassName(cname);
   for (var i = 0; i < found_tags.length; i++) {
     if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
       result_array.push(found_tags[i]);
@@ -444,12 +455,6 @@ for (var i = 0; i < elements.length; i++) {
 }|, yield)
     end
 
-    def operate_by_class(element)
-      js.operate(%|
-var elements = document.getElementsByClassName('#{element.what}');
-var element = elements[0];|, yield)
-    end
-    
     # Checkboxes/Radios have the same name, different values    
     def handle_form_element_name_match(element)
       element_capture = %|element = elements[i];break;|
