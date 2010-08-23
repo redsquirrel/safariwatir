@@ -271,11 +271,20 @@ element.style.backgroundColor = 'yellow';|
     end
 
     def element_exists?(element = @element, &block)
-      block ||= Proc.new {}
-      execute(element.operate(&block), element)
-      return true
-    rescue UnknownObjectException
+      response = eval_js(element.operate do
+<<JSCODE
+if (element == undefined || element == null) {
+  return(false);
+}
+return(true);
+JSCODE
+end)
+    case response
+    when ELEMENT_NOT_FOUND
       return false
+    else
+      return response
+    end
     end
 
     def select_option(element = @element)

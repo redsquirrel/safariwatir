@@ -30,6 +30,18 @@ module Locators
     locator_by_attribute("src")
   end
 
+  def locator_by_href
+    locator_by_attribute("href")
+  end
+
+  def locator_by_url
+    locator_by_attribute("href")
+  end
+
+  def locator_by_title
+    locator_by_attribute("title")
+  end
+
   def locator_by_method(m_name)
     "findByMethodValue(#{parent.locator}, #{tag_names}, \"#{m_name}\", #{encode_what})[0]"
   end
@@ -56,7 +68,7 @@ module Locators
   end
 
   def locator_by_id
-    "#{document_locator}.getElementById(\"#{what.to_s}\")"
+    locator_by_method("id")
   end
 
   def tag_names
