@@ -7,7 +7,31 @@ module Locators
   end
 
   def locator
-    self.send("locator_by_#{how}".to_sym)
+    self.send("locator_by_#{how.to_s}".to_sym)
+  end
+
+  def locator_by_value
+    locator_by_method("value")
+  end
+
+  def locator_by_src
+    locator_by_attribute("src")
+  end
+
+  def locator_by_alt
+    locator_by_attribute("alt")
+  end
+
+  def locator_by_src
+    locator_by_attribute("src")
+  end
+
+  def locator_by_method(m_name)
+    "findByMethodValue(#{parent.locator}, #{tag_names}, \"#{m_name}\", \"#{what.to_s}\")[0]"
+  end
+
+  def locator_by_attribute(attribute_name)
+    "findByAttributeValue(#{parent.locator}, #{tag_names}, \"#{attribute_name}\", \"#{what.to_s}\")[0]"
   end
 
   def locator_by_xpath
@@ -16,7 +40,7 @@ module Locators
   end
 
   def locator_by_name
-    "findByNameAttribute(#{document_locator}, #{parent.locator}, \"#{what.to_s}\", #{tag_names})[0]"
+    locator_by_attribute("name")
   end
 
   def locator_by_index

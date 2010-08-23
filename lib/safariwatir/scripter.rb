@@ -22,6 +22,28 @@ function findByXPath(dscope, scope, expr) {
   return(result ? result.singleNodeValue : null );
 }
 
+function filterToMethodValue(found_tags, m_name, m_value) {
+  var result_array = [];
+
+  for (var i = 0; i < found_tags.length; i++) {
+    if (found_tags[i][m_name] == m_value) {
+      result_array.push(found_tags[i]);
+    }
+  }
+  return(result_array);
+}
+
+function filterToAttributeValue(found_tags, attr_name, attr_value) {
+  var result_array = [];
+
+  for (var i = 0; i < found_tags.length; i++) {
+    if (found_tags[i].getAttribute(attr_name) == attr_value) {
+      result_array.push(found_tags[i]);
+    }
+  }
+  return(result_array);
+}
+
 function filterToTagNames(found_tags, tags) {
   var result_array = [];
 
@@ -33,15 +55,19 @@ function filterToTagNames(found_tags, tags) {
   return(result_array);
 }
 
-
-function findByNameAttribute(dscope, scope, name, tags) {
-  var found_tags = dscope.getElementsByName(name);
-  return( filterToTagNames(tags) );
-}
-
 function findByClassName(scope, cname, tags) {
   var found_tags = scope.getElementsByClassName(cname);
   return( filterToTagNames(tags) );
+}
+
+function findByMethodValue(scope, names, attribute, value) {
+  var found_tags = findByTagNames(scope, names);
+  return( filterToMethodValue(found_tags, attribute, value) );
+}
+
+function findByAttributeValue(scope, names, attribute, value) {
+  var found_tags = findByTagNames(scope, names);
+  return( filterToAttributeValue(found_tags, attribute, value) );
 }
 
 function findByTagNames(scope, names) {
@@ -192,6 +218,10 @@ if (element == undefined) {
 
     def get_attribute(name, element = @element)
       execute(element.operate { %|return element.getAttribute('#{name}')| }, element)
+    end
+
+    def get_method_value(name, element = @element)
+      execute(element.operate { %|return element.#{name}| }, element)
     end
     
       
@@ -467,14 +497,6 @@ for (var i = 0; i < elements.length; i++) {
       end
     end
     private :handle_form_element_name_match
-
-    def operate_by_src(element, &block)
-      operate_by(element, 'src', &block)
-    end
-
-    def operate_by_alt(element, &block)
-      operate_by(element, 'alt', &block)
-    end
 
     def operate_by_title(element, &block)
       operate_by(element, 'title', &block)

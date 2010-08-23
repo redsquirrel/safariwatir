@@ -98,6 +98,9 @@ module Watir
       html_attr_reader :id
       html_attr_reader :name
       html_attr_reader :title
+      html_attr_reader :src
+      html_attr_reader :alt
+      html_method_reader :value
 
       def type; nil; end
 
@@ -123,22 +126,16 @@ module Watir
         self.class.name.split("::").last
       end
 
+      def html_method name
+        @scripter.get_method_value(name, self)
+      end
+
       def attr name
         @scripter.get_attribute(name, self)
       end
 
       def operate(&block)
         @scripter.operate_by_locator(self, &block)
-=begin
-        scripter_suffix = OPERATIONS[how]
-        if scripter_suffix.kind_of? Hash
-          scripter_suffix = scripter_suffix[element_name]
-        end
-        if scripter_suffix.nil?
-          raise Watir::Exception::MissingWayOfFindingObjectException, "SafariWatir does not currently support finding by #{how}"
-        end
-        @scripter.send("operate_#{scripter_suffix}", self, &block)        
-=end
       end
 
       OPERATIONS = {
