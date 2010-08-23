@@ -10,6 +10,10 @@ module Locators
     self.send("locator_by_#{how.to_s}".to_sym)
   end
 
+  def locator_by_text
+    locator_by_method("innerText")
+  end
+
   def locator_by_value
     locator_by_method("value")
   end
@@ -48,7 +52,7 @@ module Locators
   end
 
   def locator_by_class
-    "findByClassName(#{parent.locator}, \"#{what}\", #{tag_names})[0]"
+    locator_by_attribute("class")
   end
 
   def locator_by_id

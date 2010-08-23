@@ -272,6 +272,10 @@ module Watir
       def tag; "P"; end
     end
 
+    class Pre < ContentElement
+      def tag; "Pre"; end
+    end
+
     class Label < ContentElement
 
       html_attr_reader :for
@@ -542,6 +546,10 @@ module Watir
     
     def p(how, what)
       P.new(self, scripter, how, what)
+    end
+
+    def pre(how, what)
+      Pre.new(self, scripter, how, what)
     end
 
     def form(how, what)
