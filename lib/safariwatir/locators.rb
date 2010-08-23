@@ -31,11 +31,11 @@ module Locators
   end
 
   def locator_by_method(m_name)
-    "findByMethodValue(#{parent.locator}, #{tag_names}, \"#{m_name}\", \"#{what.to_s}\")[0]"
+    "findByMethodValue(#{parent.locator}, #{tag_names}, \"#{m_name}\", #{encode_what})[0]"
   end
 
   def locator_by_attribute(attribute_name)
-    "findByAttributeValue(#{parent.locator}, #{tag_names}, \"#{attribute_name}\", \"#{what.to_s}\")[0]"
+    "findByAttributeValue(#{parent.locator}, #{tag_names}, \"#{attribute_name}\", #{encode_what})[0]"
   end
 
   def locator_by_xpath
@@ -62,6 +62,10 @@ module Locators
   def tag_names
       t_names = tag.kind_of?(Array) ? tag : [tag]
       "[" + (t_names.map { |t_name| "\"#{t_name.downcase}\"" }.join(", ")) + "]"
+  end
+
+  def encode_what
+    what.kind_of?(Regexp) ? "new RegexValueMatcher(/#{what.source}/)" : "new ExactValueMatcher(\"#{what.to_s}\")"
   end
 
   def method_missing(*args)

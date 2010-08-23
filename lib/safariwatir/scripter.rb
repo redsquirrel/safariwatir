@@ -11,6 +11,18 @@ module Watir # :nodoc:
   
   JS_LIBRARY = %|
 /* Library functions */
+var ExactValueMatcher = function(exactVal) {
+  this.match = function (val) {
+    return(val == exactVal);
+  }
+}
+
+var RegexValueMatcher = function(regEx) {
+  this.match = function (val) {
+    return(regEx.test(val));
+  }
+}
+
 function dispatchOnChange(scope, element) {
   var event = scope.createEvent('HTMLEvents');
   event.initEvent('change', true, true);  
@@ -26,7 +38,7 @@ function filterToMethodValue(found_tags, m_name, m_value) {
   var result_array = [];
 
   for (var i = 0; i < found_tags.length; i++) {
-    if (found_tags[i][m_name] == m_value) {
+    if (m_value.match(found_tags[i][m_name])) {
       result_array.push(found_tags[i]);
     }
   }
@@ -37,7 +49,7 @@ function filterToAttributeValue(found_tags, attr_name, attr_value) {
   var result_array = [];
 
   for (var i = 0; i < found_tags.length; i++) {
-    if (found_tags[i].getAttribute(attr_name) == attr_value) {
+    if (attr_value.match(found_tags[i].getAttribute(attr_name))) {
       result_array.push(found_tags[i]);
     }
   }
