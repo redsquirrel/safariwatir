@@ -287,8 +287,8 @@ if (element == undefined) {
     end
     
       
-    def document_text
-      execute(%|return document.getElementsByTagName('BODY').item(0).innerText;|)
+    def document_text(element)
+      execute(%|return #{element.locator}.getElementsByTagName('BODY').item(0).innerText;|)
     end
 
     def document_html
@@ -338,24 +338,15 @@ end)
     end
 
     def select_option(element = @element)
-      execute(element.operate do
-%|var selected = -1;
-var previous_selection = -2;
-for (var i = 0; i < element.options.length; i++) {
-  if (element.options[i].selected) {
-    previous_selection = i;
+      execute(element.operate do %|
+  var other_options = element.parentNode.options;
+  for (var i = 0; i < other_options.length; i++) {
+    other_options[i].selected = undefined;
   }
-  if (element.options[i].#{element.how} == '#{element.what}') {
-    element.options[i].selected = true;
-    selected = i;
-  }
-}
-if (selected == -1) {
-  return '#{ELEMENT_NOT_FOUND}';
-} else if (previous_selection != selected) {        
-  element.selectedIndex = selected;
-  dispatchOnChange(#{element.document_locator}, element.options[selected]);
-}
+  element.selected = "selected";
+  element.parentNode.selectedIndex = element.index;
+  dispatchOnChange(#{element.document_locator}, element);
+  dispatchOnChange(#{element.document_locator}, element.parentNode);
 |
       end, element)
     end
@@ -667,7 +658,7 @@ SCRIPT`
         when NO_RESPONSE
           nil
         when ELEMENT_NOT_FOUND
-          raise UnknownObjectException, "Unable to locate #{element.element_name}, using :#{element.how} and \"#{element.what}\""
+          raise element_not_found_exception(element)
         when TABLE_CELL_NOT_FOUND
           raise UnknownCellException, "Unable to locate a table cell with #{element.how} of #{element.what}"
         when FRAME_NOT_FOUND
@@ -675,6 +666,13 @@ SCRIPT`
         else
           response
       end
+    end
+
+    def element_not_found_exception(element)
+      if element.is_frame?
+        return UnknownFrameException.new("Unable to locate a frame, using :#{element.how} and \"#{element.what}\"")
+      end
+      UnknownObjectException.new("Unable to locate #{element.element_name}, using :#{element.how} and \"#{element.what}\"")
     end
     
     def execute_and_ignore(script)

@@ -3,6 +3,7 @@ require 'safariwatir/scripter'
 require 'safariwatir/core_ext'
 require 'safariwatir/element_attributes'
 require 'safariwatir/locators'
+require 'forwardable'
 
 module Watir
   include Watir::Exception
@@ -13,7 +14,7 @@ module Watir
     end
     
     def text
-      @scripter.document_text
+      @scripter.document_text(self)
     end
 
     def title
@@ -104,6 +105,8 @@ module Watir
 
       def type; nil; end
 
+      def is_frame?; false; end
+
       # overridden in derivitives
       def tag
         raise RuntimeError, "tag not provided for #{element_name}"
@@ -158,10 +161,25 @@ module Watir
 
     end
 
+    
+    class FrameElement < HtmlElement
+      def is_frame?; true; end
+      def tag; ["frame", "iframe"]; end
+    end
+
     class Frame
       include Container
       include PageContainer
       include Locators
+      extend Forwardable
+
+      def initialize(parent_tag, scripter_obj, find_how, find_what)
+        @parent = parent_tag
+        @scripter = scripter_obj
+        @how = find_how
+        @what = find_what
+        @frame_element = FrameElement.new(parent_tag, scripter_obj, find_how, find_what)
+      end
 
       def tag; ["frame", "iframe"]; end
 
@@ -171,9 +189,9 @@ module Watir
         self.send("locator_by_#{how}".to_sym).to_s + ".contentDocument"
       end
   
-      attr_reader :parent, :how, :what, :scripter
+      attr_reader :parent, :how, :what, :scripter, :frame_element
 
-      def_init :parent, :scripter, :how, :what
+      def_delegators :frame_element, :class_name, :id, :name, :title, :src, :alt, :exist?, :exists?
     end
 
     class Form < HtmlElement
@@ -313,7 +331,7 @@ module Watir
       end
       alias :url :href
 
-      def id
+      def iotuibd
         attr('id') || ''
       end
 
@@ -352,7 +370,7 @@ module Watir
       def option(how, what)
         Option.new(@scripter, self, how, what)
       end
-      
+
       def selected_values
         values = []
         index = 1
@@ -364,6 +382,8 @@ module Watir
         end
         values.map {|o| o.text } #TODO?
       end
+
+      alias :selected_options :selected_values
 
       def selected_value
         selected_values.first
@@ -378,24 +398,17 @@ module Watir
 
     class Option < InputElement
       def_init :scripter, :select_list, :how, :what
-      
+      def parent; @select_list; end
+
+      def selected?
+        selected_value = html_method(:selected) ? html_method(:selected) : ""
+        selected_value != ""
+      end
+
       def select
         @scripter.highlight(self) do
           select_option
         end
-      end
-      
-      def operate(&block)
-        @select_list.operate(&block)
-      end
-
-      def exists?
-        @scripter.option_exists?(self)
-      end
-      alias :exist? :exists?
-      
-      def selected?
-        @scripter.option_selected?(self)
       end
       
       def text
@@ -526,6 +539,10 @@ module Watir
     end
 
     class Password < TextField
+    end
+
+    class Ol < ContentElement
+      def tag; "OL"; end
     end
 
     class Ul < ContentElement
@@ -666,6 +683,10 @@ module Watir
       FileField.new(self, scripter, how, what)
     end
 
+    def ol(how, what)
+      Ol.new(self, scripter, how, what)
+    end
+
     def ul(how, what)
       Ul.new(self, scripter, how, what)
     end
@@ -677,7 +698,7 @@ module Watir
       when String
         text.index(what)
       else
-        raise MissingWayOfFindingObjectException
+        raise TypeError
       end
     end
   end
