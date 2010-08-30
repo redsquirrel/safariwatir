@@ -225,6 +225,14 @@ module Watir
         @scripter.speak_text_of(self)
       end      
     end
+
+    class Dd < ContentElement
+      def tag; "DD"; end
+    end
+
+    class Dt < ContentElement
+      def tag; "DT"; end
+    end
     
     class Image < HtmlElement
       include Clickable
@@ -278,7 +286,7 @@ module Watir
     end
 
     class Pre < ContentElement
-      def tag; "Pre"; end
+      def tag; "PRE"; end
     end
 
     class Label < ContentElement
@@ -550,10 +558,18 @@ module Watir
       Checkbox.new(self, scripter, how, what, value)
     end
 
+    def dd(how, what)
+      Dd.new(self, scripter, how, what)
+    end
+
     def div(how, what)
       Div.new(self, scripter, how, what)
     end
     
+    def dt(how, what)
+      Dt.new(self, scripter, how, what)
+    end
+
     def p(how, what)
       P.new(self, scripter, how, what)
     end
