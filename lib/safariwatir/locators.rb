@@ -73,7 +73,7 @@ module Locators
 
   def tag_names
       t_names = tag.kind_of?(Array) ? tag : [tag]
-      "[" + (t_names.map { |t_name| "\"#{t_name.downcase}\"" }.join(", ")) + "]"
+      "[" + (t_names.map { |t_name| "\"#{t_name.upcase}\"" }.join(", ")) + "]"
   end
 
   def encode_what
@@ -87,4 +87,41 @@ module Locators
     super(*args)
   end
 
+end
+
+module InputLocators
+  include Locators
+
+  def locator_by_method(m_name)
+    "findInputByMethodValue(#{parent.locator}, \"#{input_type}\", \"#{m_name}\", #{encode_what})[0]"
+  end
+
+  def locator_by_attribute(attribute_name)
+    "findInputByAttributeValue(#{parent.locator}, \"#{input_type}\", \"#{attribute_name}\", #{encode_what})[0]"
+  end
+
+  def locator_by_index
+    "findInputsByType(#{parent.locator}, \"#{input_type}\")[#{what.to_i - 1}]"
+  end
+
+end
+
+module ButtonLocators
+  include Locators
+
+  def locator_by_index
+    "findAllMatching(#{parent.locator}, new ButtonMatcher())[#{what.to_i - 1}]"
+  end
+
+  def locator_by_attribute(attribute_name)
+    "filterToAttributeValue(findAllMatching(#{parent.locator}, new ButtonMatcher()), \"#{attribute_name}\", #{encode_what})[0]"
+  end
+
+  def locator_by_method(attribute_name)
+    "filterToMethodValue(findAllMatching(#{parent.locator}, new ButtonMatcher()), \"#{attribute_name}\", #{encode_what})[0]"
+  end
+
+  def locator_by_value
+    locator_by_attribute("value")
+  end
 end

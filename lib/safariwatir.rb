@@ -233,11 +233,16 @@ module Watir
     end
     
     class Button < InputElement
+      include ButtonLocators
     end
         
     class Checkbox < InputElement
       def_init :parent, :scripter, :how, :what, :value
       
+      include InputLocators
+
+      def input_type; "checkbox"; end
+
       def by_value
         @value
       end
@@ -324,6 +329,7 @@ module Watir
     end
 
     class Radio < Checkbox
+      def input_type; "radio"; end
     end
 
     class SelectList < InputElement
@@ -467,6 +473,8 @@ module Watir
     end
 
     class TextField < InputElement
+      include InputLocators
+      def input_type; "text"; end
 
       def set(value)
         value = value.to_s
@@ -502,6 +510,8 @@ module Watir
     end
 
     class FileField < TextField
+      def input_type; "file"; end
+
       def set(value)
         @scripter.set_file_field(self, value.to_s)
       end

@@ -9,8 +9,24 @@ module Watir # :nodoc:
   TABLE_CELL_NOT_FOUND = "__safari_watir_cell_unfound__"
   EXTRA_ACTION_SUCCESS = "__safari_watir_extra_action__"
   
-  JS_LIBRARY = %|
+  JS_LIBRARY = <<JSCODE
 /* Library functions */
+
+var ButtonMatcher = function() {
+  this.match = function(ele) {
+    if (ele.tagName == "BUTTON") { 
+      return(true);
+    }
+
+    if (ele.tagName == 'INPUT') {
+      return(["submit", "button", "reset"].indexOf(ele.type) != -1);
+    }
+
+    return(false);
+  }
+}
+
+
 var ExactValueMatcher = function(exactVal) {
   this.match = function (val) {
     return(val == exactVal);
@@ -60,7 +76,7 @@ function filterToTagNames(found_tags, tags) {
   var result_array = [];
 
   for (var i = 0; i < found_tags.length; i++) {
-    if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != 0) {
+    if (found_tags[i].tagName != 'META' && tags.indexOf(found_tags[i].tagName) != -1) {
       result_array.push(found_tags[i]);
     }
   }
@@ -72,6 +88,16 @@ function findByClassName(scope, cname, tags) {
   return( filterToTagNames(tags) );
 }
 
+function findInputByMethodValue(scope, input_type, attribute, value) {
+  var found_tags = findInputsByType(scope, input_type);
+  return( filterToMethodValue(found_tags, attribute, value) );
+}
+
+function findInputByAttributeValue(scope, input_type, attribute, value) {
+  var found_tags = findInputsByType(scope, input_type);
+  return( filterToAttributeValue(found_tags, attribute, value) );
+}
+
 function findByMethodValue(scope, names, attribute, value) {
   var found_tags = findByTagNames(scope, names);
   return( filterToMethodValue(found_tags, attribute, value) );
@@ -80,6 +106,30 @@ function findByMethodValue(scope, names, attribute, value) {
 function findByAttributeValue(scope, names, attribute, value) {
   var found_tags = findByTagNames(scope, names);
   return( filterToAttributeValue(found_tags, attribute, value) );
+}
+
+function findAllMatching(scope, ele_matcher) {
+  var result_array = [];
+  var found_tags = scope.getElementsByTagName('*');
+
+  for (var i = 0; i < found_tags.length; i++) {
+    if (ele_matcher.match(found_tags[i])) {
+      result_array.push(found_tags[i]);
+    }
+  }
+  return(result_array);
+}
+
+function findInputsByType(scope, input_type) {
+  var result_array = [];
+  var found_tags = scope.getElementsByTagName("input");
+
+  for (var i = 0; i < found_tags.length; i++) {
+    if (found_tags[i].type == input_type) {
+      result_array.push(found_tags[i]);
+    }
+  }
+  return(result_array);
 }
 
 function findByTagNames(scope, names) {
@@ -96,7 +146,7 @@ function findByTagNames(scope, names) {
 }
 
 /* Action Code */
-|
+JSCODE
 
   class JavaScripter # :nodoc:
     def operate(locator, operation)
