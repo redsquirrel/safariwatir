@@ -8,6 +8,14 @@ require 'forwardable'
 module Watir
   include Watir::Exception
 
+  class ElementCollection < Array
+
+    def [](idx)
+      super(idx - 1)
+    end
+
+  end
+
   module PageContainer
     def html
       @scripter.document_html
@@ -426,9 +434,9 @@ module Watir
       def tag; "MAP"; end
     end
 
-    class Table
+    class Table < ContentElement
       def_init :parent, :scripter, :how, :what
-      attr_reader :how, :what
+      attr_reader :parent, :how, :what
       
       def each
         # TODO
@@ -449,7 +457,7 @@ module Watir
       def tag; "TABLE"; end
     end
     
-    class TableRow
+    class TableRow < ContentElement
       def initialize(scripter, how, what, table = nil)
         @scripter = scripter
         @how = how
@@ -458,6 +466,8 @@ module Watir
       end
 
       attr_reader :table, :how, :what
+
+      alias :parent :table
             
       def each
         # TODO
@@ -563,8 +573,20 @@ module Watir
       Area.new(self, scripter, how, what)
     end
     
+    def areas
+      child_tag_list do |idx|
+        Area.new(self, scripter, :index, idx)
+      end
+    end
+
     def button(how, what)
       Button.new(self, scripter, how, what)
+    end
+
+    def buttons
+      child_tag_list do |idx|
+        Button.new(self, scripter, :index, idx)
+      end
     end
 
     def cell(how, what)
@@ -575,28 +597,70 @@ module Watir
       Checkbox.new(self, scripter, how, what, value)
     end
 
+    def checkboxes
+      child_tag_list do |idx|
+        Checkbox.new(self, scripter, :index, idx, nil)
+      end
+    end
+
     def dd(how, what)
       Dd.new(self, scripter, how, what)
+    end
+
+    def dds
+      child_tag_list do |idx|
+        Dd.new(self, scripter, :index, idx)
+      end
     end
 
     def div(how, what)
       Div.new(self, scripter, how, what)
     end
     
+    def divs
+      child_tag_list do |idx|
+        Div.new(self, scripter, :index, idx)
+      end
+    end
+
     def dt(how, what)
       Dt.new(self, scripter, how, what)
+    end
+
+    def dts
+      child_tag_list do |idx|
+        Dt.new(self, scripter, :index, idx)
+      end
     end
 
     def p(how, what)
       P.new(self, scripter, how, what)
     end
 
+    def ps
+      child_tag_list do |idx|
+        P.new(self, scripter, :index, idx)
+      end
+    end
+
     def pre(how, what)
       Pre.new(self, scripter, how, what)
     end
 
+    def pres
+      child_tag_list do |idx|
+        Pre.new(self, scripter, :index, idx)
+      end
+    end
+
     def form(how, what)
       Form.new(self, scripter, how, what)
+    end
+
+    def forms
+      child_tag_list do |idx|
+        Form.new(self, scripter, :index, idx)
+      end
     end
 
     def frame(how, what)
@@ -631,24 +695,60 @@ module Watir
       Image.new(self, scripter, how, what)
     end
 
+    def images
+      child_tag_list do |idx|
+        Image.new(self, scripter, :index, idx)
+      end
+    end
+
     def label(how, what)
       Label.new(self, scripter, how, what)
+    end
+
+    def labels
+      child_tag_list do |idx|
+        Label.new(self, scripter, :index, idx)
+      end
     end
 
     def li(how, what)
       Li.new(self, scripter, how, what)
     end
     
+    def lis
+      child_tag_list do |idx|
+        Li.new(self, scripter, :index, idx)
+      end
+    end
+
     def link(how, what)
       Link.new(self, scripter, how, what)
+    end
+
+    def links
+      child_tag_list do |idx|
+        Link.new(self, scripter, :index, idx)
+      end
     end
 
     def map(how, what)
       Map.new(self, scripter, how, what)
     end
 
+    def maps
+      child_tag_list do |idx|
+        Map.new(self, scripter, :index, idx)
+      end
+    end
+
     def password(how, what)
       Password.new(self, scripter, how, what)
+    end
+
+    def passwords
+      child_tag_list do |idx|
+        Password.new(self, scripter, :index, idx)
+      end
     end
 
     def radio(how, what, value = nil)
@@ -659,22 +759,52 @@ module Watir
       TableRow.new(self, scripter, how, what)
     end
 
+    def rows
+      child_tag_list do |idx|
+        TableRow.new(self, scripter, :index, idx)
+      end
+    end
+
     def select_list(how, what)
       SelectList.new(self, scripter, how, what)
+    end
+
+    def select_lists
+      child_tag_list do |idx|
+        SelectList.new(self, scripter, :index, idx)
+      end
     end
     
     def span(how, what)
       Span.new(self, scripter, how, what)
     end
 
+    def spans
+      child_tag_list do |idx|
+        Span.new(self, scripter, :index, idx)
+      end
+    end
+
     def table(how, what)
       Table.new(self, scripter, how, what)
     end
     
+    def tables
+      child_tag_list do |idx|
+        Table.new(self, scripter, :index, idx)
+      end
+    end
+
     def text_field(how, what)
       TextField.new(self, scripter, how, what)
     end
     
+    def text_fields
+      child_tag_list do |idx|
+        TextField.new(self, scripter, :index, idx)
+      end
+    end
+
     def text_area(how, what)
       TextArea.new(self, scripter, how, what)
     end
@@ -683,12 +813,42 @@ module Watir
       FileField.new(self, scripter, how, what)
     end
 
+    def file_fields
+      child_tag_list do |idx|
+        FileField.new(self, scripter, :index, idx)
+      end
+    end
+
     def ol(how, what)
       Ol.new(self, scripter, how, what)
     end
 
+    def ols
+      child_tag_list do |idx|
+        Ol.new(self, scripter, :index, idx)
+      end
+    end
+
     def ul(how, what)
       Ul.new(self, scripter, how, what)
+    end
+
+    def uls
+      child_tag_list do |idx|
+        Ul.new(self, scripter, :index, idx)
+      end
+    end
+
+    def child_tag_list(&child_tag_blk)
+        values = ElementCollection.new
+        index = 1
+        loop do
+          child_tag = child_tag_blk.call(index)
+          break unless child_tag.exists?
+          values << child_tag
+          index += 1
+        end
+        values
     end
     
     def contains_text(what)
