@@ -256,10 +256,18 @@ module Watir
       def tag; "DD"; end
     end
 
+    class Dl < ContentElement
+      def tag; "DL"; end
+    end
+
     class Dt < ContentElement
       def tag; "DT"; end
     end
     
+    class Em < ContentElement
+      def tag; "EM"; end
+    end
+
     class Image < HtmlElement
       include Clickable
       
@@ -428,6 +436,10 @@ module Watir
 
     class Span < ContentElement
       def tag; "SPAN"; end
+    end
+
+    class Strong < ContentElement
+      def tag; "STRONG"; end
     end
 
     class Map < InputElement
@@ -623,6 +635,16 @@ module Watir
       end
     end
 
+    def dl(how, what)
+      Dl.new(self, scripter, how, what)
+    end
+
+    def dls
+      child_tag_list do |idx|
+        Dl.new(self, scripter, :index, idx)
+      end
+    end
+
     def dt(how, what)
       Dt.new(self, scripter, how, what)
     end
@@ -630,6 +652,16 @@ module Watir
     def dts
       child_tag_list do |idx|
         Dt.new(self, scripter, :index, idx)
+      end
+    end
+
+    def em(how, what)
+      Em.new(self, scripter, how, what)
+    end
+
+    def ems
+      child_tag_list do |idx|
+        Em.new(self, scripter, :index, idx)
       end
     end
 
@@ -782,6 +814,16 @@ module Watir
     def spans
       child_tag_list do |idx|
         Span.new(self, scripter, :index, idx)
+      end
+    end
+
+    def strong(how, what)
+      Strong.new(self, scripter, how, what)
+    end
+
+    def strongs
+      child_tag_list do |idx|
+        Strong.new(self, scripter, :index, idx)
       end
     end
 
