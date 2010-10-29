@@ -233,6 +233,10 @@ module Watir
 
       # Hook for derivitives
       def by_value; end
+
+      # See watirspec TextField#exists? - expects text_field(:text, 'Value') to found by it's value
+      alias :locator_by_text :locator_by_value
+
     end
     
     class ContentElement < HtmlElement
