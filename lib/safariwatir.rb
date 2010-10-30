@@ -275,6 +275,7 @@ module Watir
     end
     
     class Button < InputElement
+      def tag; ["INPUT", "BUTTON"]; end
       include ButtonLocators
     end
         
