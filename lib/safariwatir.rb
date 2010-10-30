@@ -562,6 +562,7 @@ module Watir
     end
 
     class Password < TextField
+      def input_type; "password"; end
     end
 
     class Ol < ContentElement
