@@ -104,6 +104,18 @@ module InputLocators
     "findInputsByType(#{parent.locator}, \"#{input_type}\")[#{what.to_i - 1}]"
   end
 
+  def locator_by_label
+    <<-JS_END
+      (function(){
+          var e = findByMethodValue(#{parent.locator}, ["LABEL"], "innerText", #{encode_what})[0];
+          if( e != null && e.getAttribute("for")){
+            e = document.getElementById(e.getAttribute("for"));
+          }
+          return e;
+       })();
+    JS_END
+  end
+
 end
 
 module ButtonLocators
