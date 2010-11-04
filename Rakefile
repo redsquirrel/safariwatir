@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'echoe'
 
-Echoe.new('safariwatir', '0.3.9u') do | config |
+Echoe.new('safariwatir', '0.4.0') do | config |
   config.summary = %q{Automated testing tool for web applications.}
   config.description = %q{WATIR stands for "Web Application Testing in Ruby".  See WATIR project for more information.  This is a Safari-version of the original IE-only WATIR.}
   config.url = 'http://wiki.openqa.org/display/WTR/SafariWatir'
