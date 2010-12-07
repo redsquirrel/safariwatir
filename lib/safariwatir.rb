@@ -679,7 +679,7 @@ module Watir
       end
     end
 
-    def dl(how, what)
+    def dl(how, what = nil)
       Dl.new(self, scripter, how, what)
     end
 
@@ -699,7 +699,7 @@ module Watir
       end
     end
 
-    def em(how, what)
+    def em(how, what = nil)
       Em.new(self, scripter, how, what)
     end
 
@@ -915,7 +915,7 @@ module Watir
       end
     end
 
-    def ul(how, what)
+    def ul(how, what = nil)
       Ul.new(self, scripter, how, what)
     end
 
