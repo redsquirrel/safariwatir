@@ -102,9 +102,9 @@ module Watir
       def initialize parent, scripter, how, what = nil
         @parent = parent
         @scripter = scripter
-        @how = how.kind_of?(Symbol) ? how : how_default
-        @what = what != nil ? what : how
+        @how, @what = process_default(how, what)
       end
+
 
       include Locators
 
@@ -174,9 +174,21 @@ module Watir
         :xpath => "by_xpath",
       }
 
-      def how_default
+      def default_attribute
         :id
       end
+
+      # Determine the how and what when defaults are possible.
+      # copied and changed from Watir/container.rb
+      def process_default(how, what)
+        if what.nil? and not how.kind_of?(Symbol) # not symbol instead of kindof String as in Watir
+          what = how
+          how = default_attribute
+        end
+        return how, what
+      end
+      private :process_default
+
     end
 
     
@@ -220,7 +232,7 @@ module Watir
       
       def tag; "FORM"; end
 
-      def how_default()
+      def default_attribute()
         :name
       end
 
@@ -252,7 +264,7 @@ module Watir
       # See watirspec TextField#exists? - expects text_field(:text, 'Value') to found by it's value
       alias :locator_by_text :locator_by_value
 
-      def how_default
+      def default_attribute
         :name
       end
 
@@ -296,14 +308,14 @@ module Watir
       
       def tag; "IMG"; end
 
-      def how_default
+      def default_attribute
         :src
       end
     end
     
     class Button < InputElement
       include ButtonLocators
-      def how_default; :value; end
+      def default_attribute; :value; end
     end
         
     class Checkbox < InputElement
@@ -360,7 +372,7 @@ module Watir
       html_attr_reader :for
       def tag; "LABEL"; end
 
-      def how_default()
+      def default_attribute()
         :text
       end
 
@@ -407,7 +419,7 @@ module Watir
 
       def tag; "A"; end
 
-      def how_default
+      def default_attribute
         :href
       end
 
