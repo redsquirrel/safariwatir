@@ -96,8 +96,15 @@ module Watir
     end
 
     class HtmlElement
-      def_init :parent, :scripter, :how, :what
+
       attr_reader :how, :what, :parent
+
+      def initialize parent, scripter, how, what = nil
+        @parent = parent
+        @scripter = scripter
+        @how = how.kind_of?(Symbol) ? how : how_default
+        @what = what != nil ? what : how
+      end
 
       include Locators
 
@@ -167,6 +174,9 @@ module Watir
         :xpath => "by_xpath",
       }
 
+      def how_default
+        :id
+      end
     end
 
     
@@ -184,9 +194,9 @@ module Watir
       def initialize(parent_tag, scripter_obj, find_how, find_what)
         @parent = parent_tag
         @scripter = scripter_obj
-        @how = find_how
-        @what = find_what
-        @frame_element = FrameElement.new(parent_tag, scripter_obj, find_how, find_what)
+        @how = find_how.kind_of?(Symbol) ? find_how : :name
+        @what = find_what != nil ? find_what : find_how
+        @frame_element = FrameElement.new(parent, scripter, how, what)
       end
 
       def tag; ["frame", "iframe"]; end
@@ -203,13 +213,18 @@ module Watir
     end
 
     class Form < HtmlElement
-      def_init :parent, :scripter, :how, :what
 
       def submit
         @scripter.submit_form(self)
       end
       
       def tag; "FORM"; end
+
+      def how_default()
+        :name
+      end
+
+
     end
     
     class InputElement < HtmlElement
@@ -236,6 +251,10 @@ module Watir
 
       # See watirspec TextField#exists? - expects text_field(:text, 'Value') to found by it's value
       alias :locator_by_text :locator_by_value
+
+      def how_default
+        :name
+      end
 
     end
     
@@ -276,15 +295,24 @@ module Watir
       include Clickable
       
       def tag; "IMG"; end
+
+      def how_default
+        :src
+      end
     end
     
     class Button < InputElement
       include ButtonLocators
+      def how_default; :value; end
     end
         
     class Checkbox < InputElement
-      def_init :parent, :scripter, :how, :what, :value
-      
+#      def_init :parent, :scripter, :how, :what, :value
+      def initialize parent, scripter, how, what = nil, value=nil
+        super(parent,scripter,how,what)
+        @value = value
+      end
+
       include InputLocators
 
       def input_type; "checkbox"; end
@@ -331,6 +359,12 @@ module Watir
 
       html_attr_reader :for
       def tag; "LABEL"; end
+
+      def how_default()
+        :text
+      end
+
+
     end
 
     class Link < ContentElement
@@ -372,6 +406,12 @@ module Watir
       end
 
       def tag; "A"; end
+
+      def how_default
+        :href
+      end
+
+
     end
 
     class Radio < Checkbox
@@ -585,7 +625,7 @@ module Watir
 
     # Elements
 
-    def area(how, what)
+    def area(how, what = nil)
       Area.new(self, scripter, how, what)
     end
     
@@ -595,7 +635,7 @@ module Watir
       end
     end
 
-    def button(how, what)
+    def button(how, what = nil)
       Button.new(self, scripter, how, what)
     end
 
@@ -609,7 +649,7 @@ module Watir
       TableCell.new(self, scripter, how, what)
     end
 
-    def checkbox(how, what, value = nil)
+    def checkbox(how, what = nil, value=nil)
       Checkbox.new(self, scripter, how, what, value)
     end
 
@@ -629,7 +669,7 @@ module Watir
       end
     end
 
-    def div(how, what)
+    def div(how, what = nil)
       Div.new(self, scripter, how, what)
     end
     
@@ -669,7 +709,7 @@ module Watir
       end
     end
 
-    def p(how, what)
+    def p(how, what = nil)
       P.new(self, scripter, how, what)
     end
 
@@ -679,7 +719,7 @@ module Watir
       end
     end
 
-    def pre(how, what)
+    def pre(how, what = nil)
       Pre.new(self, scripter, how, what)
     end
 
@@ -689,7 +729,7 @@ module Watir
       end
     end
 
-    def form(how, what)
+    def form(how, what = nil)
       Form.new(self, scripter, how, what)
     end
 
@@ -699,35 +739,35 @@ module Watir
       end
     end
 
-    def frame(how, what)
+    def frame(how, what = nil)
       Frame.new(self, scripter, how, what)
     end
     
-    def h1(how, what)
+    def h1(how, what = nil)
       Header.new(self, scripter, how, what, 1)
     end
 
-    def h2(how, what)
+    def h2(how, what = nil)
       Header.new(self, scripter, how, what, 2)
     end
 
-    def h3(how, what)
+    def h3(how, what = nil)
       Header.new(self, scripter, how, what, 3)
     end
 
-    def h4(how, what)
+    def h4(how, what = nil)
       Header.new(self, scripter, how, what, 4)
     end
 
-    def h5(how, what)
+    def h5(how, what = nil)
       Header.new(self, scripter, how, what, 5)
     end
 
-    def h6(how, what)
+    def h6(how, what = nil)
       Header.new(self, scripter, how, what, 6)
     end
 
-    def image(how, what)
+    def image(how, what = nil)
       Image.new(self, scripter, how, what)
     end
 
@@ -737,7 +777,7 @@ module Watir
       end
     end
 
-    def label(how, what)
+    def label(how, what = nil)
       Label.new(self, scripter, how, what)
     end
 
@@ -747,7 +787,7 @@ module Watir
       end
     end
 
-    def li(how, what)
+    def li(how, what = nil)
       Li.new(self, scripter, how, what)
     end
     
@@ -757,7 +797,7 @@ module Watir
       end
     end
 
-    def link(how, what)
+    def link(how, what = nil)
       Link.new(self, scripter, how, what)
     end
 
@@ -767,7 +807,7 @@ module Watir
       end
     end
 
-    def map(how, what)
+    def map(how, what = nil)
       Map.new(self, scripter, how, what)
     end
 
@@ -787,7 +827,7 @@ module Watir
       end
     end
 
-    def radio(how, what, value = nil)
+    def radio(how, what = nil, value = nil)
       Radio.new(self, scripter, how, what, value)
     end
 
@@ -801,7 +841,7 @@ module Watir
       end
     end
 
-    def select_list(how, what)
+    def select_list(how, what = nil)
       SelectList.new(self, scripter, how, what)
     end
 
@@ -811,7 +851,7 @@ module Watir
       end
     end
     
-    def span(how, what)
+    def span(how, what = nil)
       Span.new(self, scripter, how, what)
     end
 
@@ -821,7 +861,7 @@ module Watir
       end
     end
 
-    def strong(how, what)
+    def strong(how, what = nil)
       Strong.new(self, scripter, how, what)
     end
 
@@ -841,7 +881,7 @@ module Watir
       end
     end
 
-    def text_field(how, what)
+    def text_field(how, what = nil)
       TextField.new(self, scripter, how, what)
     end
     
@@ -855,7 +895,7 @@ module Watir
       TextArea.new(self, scripter, how, what)
     end
 
-    def file_field(how, what)
+    def file_field(how, what = nil)
       FileField.new(self, scripter, how, what)
     end
 
@@ -865,7 +905,7 @@ module Watir
       end
     end
 
-    def ol(how, what)
+    def ol(how, what = nil)
       Ol.new(self, scripter, how, what)
     end
 
