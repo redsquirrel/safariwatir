@@ -139,6 +139,12 @@ module Watir
         @scripter.element_exists?(self)
       end
       alias :exist? :exists?
+
+      #locate in watir assigns the ole proxy and returns it, safariwatir doesn't have an equivlant
+      def locate
+        return self if exists?
+        nil
+      end
       
       def element_name
         self.class.name.split("::").last
