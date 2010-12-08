@@ -644,6 +644,20 @@ SCRIPT`
       nil
     end 
 
+    #table specific methods
+
+    def table_row_count(element = @element)
+      execute(element.operate do
+%|var rows = element.getElementsByTagName('TR'), i, len = rows.length, row, count = 0;
+for( i = 0 ; i < len ; i ++ ){
+  row = rows[i];
+  if( row.parentNode.parentNode === element )
+    count ++;
+}
+return count;
+|
+        end)
+    end
 
     private
 

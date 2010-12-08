@@ -32,7 +32,7 @@ module Watir
 
   module Container
     attr_reader :scripter
-    private :scripter
+#    private :scripter
 
     DEFAULT_TYPING_LAG = 0.08
 
@@ -521,7 +521,8 @@ module Watir
       end
       
       def row_count
-        # TODO
+        raise UnknownObjectException, "unable to get row_count #{self.inspect}" if not exist?
+        @scripter.table_row_count(self)
       end
       
       def column_count
