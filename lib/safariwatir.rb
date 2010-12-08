@@ -503,7 +503,7 @@ module Watir
     end
 
     class Table < ContentElement
-      def_init :parent, :scripter, :how, :what
+
       attr_reader :parent, :how, :what
       
       def each
@@ -883,7 +883,7 @@ module Watir
       end
     end
 
-    def table(how, what)
+    def table(how, what = nil)
       Table.new(self, scripter, how, what)
     end
     
