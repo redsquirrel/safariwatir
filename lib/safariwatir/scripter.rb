@@ -642,8 +642,11 @@ return values|
 say "#{string.quote_safe}"
 SCRIPT`
       nil
-    end 
+    end
 
+    def exists?
+      @document.exists
+    end
 
     private
 

@@ -965,6 +965,10 @@ module Watir
       scripter.reload
     end
     alias :refresh :reload
+    
+    def exists?
+      @scripter.exists?
+    end
   end # class Safari
 
   
