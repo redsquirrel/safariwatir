@@ -647,6 +647,9 @@ SCRIPT`
     def exists?
       @document.exists
     end
+    def execute_script(script)
+      @document.do_JavaScript(script)
+    end
 
     private
 

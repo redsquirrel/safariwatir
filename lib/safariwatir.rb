@@ -969,6 +969,12 @@ module Watir
     def exists?
       @scripter.exists?
     end
+    def execute_script(script)
+      @scripter.execute_script(script)
+    end
+    def status
+      @scripter.execute_script("window.status")
+    end
   end # class Safari
 
   
