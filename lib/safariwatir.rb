@@ -167,6 +167,10 @@ module Watir
         :xpath => "by_xpath",
       }
 
+      def flash
+        10.times {@scripter.highlight(self) {sleep 0.05} }
+      end
+
     end
 
     
