@@ -961,7 +961,12 @@ module Watir
     end
     
     def goto(url)
-      scripter.navigate_to(url)
+      if url.match(/^http(s?):\/\//i)
+        url_with_http = url
+      else
+        url_with_http = "http://#{url}"
+      end
+      scripter.navigate_to(url_with_http)
     end
     
     # Reloads the page
