@@ -986,7 +986,7 @@ module Watir
     end
     def back
       execute_script("window.history.go(-1)")
-      sleep 0.001 # Browser#"goes to the previous page" spec fails without this line
+      sleep 0.01 # Browser#"goes to the previous page" spec fails without this line
     end
   end # class Safari
 
