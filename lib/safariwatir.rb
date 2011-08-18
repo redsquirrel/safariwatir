@@ -984,6 +984,10 @@ module Watir
     def status
       @scripter.execute_script("window.status")
     end
+    def back
+      execute_script("window.history.go(-1)")
+      sleep 0.001 # Browser#"goes to the previous page" spec fails without this line
+    end
   end # class Safari
 
   
