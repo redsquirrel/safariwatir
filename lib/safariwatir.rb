@@ -982,7 +982,7 @@ module Watir
       @scripter.execute_script(script)
     end
     def status
-      @scripter.execute_script("window.status")
+      execute_script("window.status")
     end
     def back
       execute_script("window.history.go(-1)")
