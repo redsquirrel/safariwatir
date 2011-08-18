@@ -250,7 +250,7 @@ if (element) {
   
     def navigate_to(url, &extra_action)
       page_load(extra_action) do
-        @document.open_location(url)
+        @document.URL.set(url)
       end
     end
     
