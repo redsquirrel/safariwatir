@@ -553,6 +553,38 @@ module Watir
       def tag; ["input", "textarea"]; end
     end
 
+    class TextArea2 < InputElement
+      def tag; ["textarea"]; end
+
+      def set(value)
+        value = value.to_s
+        @scripter.focus(self)
+        @scripter.highlight(self) do
+          clear_text_input
+          value.length.times do |i|
+            append_text_input(value[i, 1])
+          end
+        end
+        @scripter.blur(self)
+      end
+
+      def getContents
+        @scripter.get_value_for(self)
+      end
+
+      alias :value :getContents
+
+      def verify_contains(expected)
+        actual = getContents
+        case expected
+        when Regexp
+          actual.match(expected) != nil
+        else
+          expected == actual
+        end
+      end
+    end
+
     class FileField < TextField
       def input_type; "file"; end
 
@@ -850,6 +882,10 @@ module Watir
     end
 
     def text_area(how, what)
+      TextArea.new(self, scripter, how, what)
+    end
+
+    def text_area2(how, what)
       TextArea.new(self, scripter, how, what)
     end
 
