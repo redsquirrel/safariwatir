@@ -642,8 +642,14 @@ return values|
 say "#{string.quote_safe}"
 SCRIPT`
       nil
-    end 
+    end
 
+    def exists?
+      @document.exists
+    end
+    def execute_script(script)
+      @document.do_JavaScript(script)
+    end
 
     private
 

@@ -167,6 +167,10 @@ module Watir
         :xpath => "by_xpath",
       }
 
+      def flash
+        10.times {@scripter.highlight(self) {sleep 0.05} }
+      end
+
     end
 
     
@@ -993,7 +997,12 @@ module Watir
     end
     
     def goto(url)
-      scripter.navigate_to(url)
+      if url.match(/:\/\//)
+        url_with_scheme = url
+      else
+        url_with_scheme = "http://#{url}"
+      end
+      scripter.navigate_to(url_with_scheme)
     end
     
     # Reloads the page
@@ -1001,6 +1010,24 @@ module Watir
       scripter.reload
     end
     alias :refresh :reload
+    
+    def exists?
+      @scripter.exists?
+    end
+    def execute_script(script)
+      @scripter.execute_script(script)
+    end
+    def status
+      execute_script("window.status")
+    end
+    def back
+      execute_script("window.history.go(-1)")
+      sleep 0.01 # Browser#"goes to the previous page" spec fails without this line
+    end
+    def forward
+      execute_script("window.history.go(1)")
+      sleep 0.01 # Browser#"goes to the next page" spec fails without this line
+    end
   end # class Safari
 
   
